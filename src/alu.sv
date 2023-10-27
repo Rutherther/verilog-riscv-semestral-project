@@ -20,7 +20,7 @@ module alu(
 
 
   always_comb begin
-    out = {WIDTH{1'bX}};
+
     case (op)
       3'b000 : out = a + real_b;
       3'b001 : out = a << real_b;
@@ -35,6 +35,7 @@ module alu(
       end
       3'b110 : out = a | real_b;
       3'b111 : out = a & real_b;
+      default: out = {WIDTH{1'bX}};
     endcase
   end
 
