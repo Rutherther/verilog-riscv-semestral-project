@@ -8,8 +8,8 @@ module register_file(clk, a1, a2, a3, we3, wd3, rd1, rd2);
   input       we3; // write enable
   input [31:0] wd3; // write data
 
-  output [31:0] rd1;
-  output [31:0] rd2;
+  output reg [31:0] rd1;
+  output reg [31:0] rd2;
 
   reg [31:0]    gprs [32];
 
@@ -35,4 +35,3 @@ module register_file(clk, a1, a2, a3, we3, wd3, rd1, rd2);
   end
 
 endmodule
-//
