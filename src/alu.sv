@@ -29,7 +29,7 @@ module alu(
       3'b100 : out = a ^ real_b;
       3'b101 : begin
         if (sign)
-          out = a >>> real_b;
+          out = signed'(a) >>> signed'(real_b);
         else
           out = a >> real_b;
       end
