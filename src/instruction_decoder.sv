@@ -1,15 +1,14 @@
 module instruction_decoder(
   input [31:0]     instruction,
 
-  // whether to use memory as a source, instead of alu
-  output reg       load_memory,
+  // whether to write to to memory (write enabled)
+  // either from alu or pc+4
   output reg       store_memory,
 
-  // TODO: implement
-  // mask to use for halfwords, bits, etc.
-  // used when loading memory, storing memory,
-  // registers...
-  output [31:0]    mask,
+  // whether to load memory to rd
+  output reg       load_memory,
+  output reg [5:0] load_memory_size,
+  output reg       load_memory_sign_extension,
 
   // put alu_jump to alu if conditional_jump
   //
@@ -20,19 +19,22 @@ module instruction_decoder(
   // if store pd => rd = pd + 4
 
   // inputs for alu, in case instruction is not conditional_jump
-  output [2:0]     alu_reg_op, // the operation selection for alu
-  output           alu_reg_add_one, //  whether to add one to rs2 (may be used for two's complement)
-  output           alu_reg_negate, // whether to negate rs2 (may be used for two's complement)
-  output           alu_reg_signed, // whether the operation for alu is signed
-  output reg       load_pc, // should load pc to alu #1
-  output reg       store_pc, // should store pc + 4
+  output [2:0]     alu_reg_op,         // the operation selection for alu
+  output           alu_reg_add_one,    //  whether to add one to rs2 (may be used for two's complement)
+  output           alu_reg_negate,     // whether to negate rs2 (may be used for two's complement)
+  output           alu_reg_signed,     // whether the operation for alu is signed
+
+  output reg       load_pc,            // should load pc to alu #1
+  output reg       store_pc,           // should store pc + 4 to memory
 
   output reg       unconditional_jump, // jump, always. To alu output.
 
-  output reg       conditional_jump, // should jump if alu zero_flag correct
-  output reg       alu_jump_op, // operation for alu for conditional jumps
-  output reg       alu_jump_add_one, // add one for conditional jumps
-  output reg       jump_negate_zero, // whether to negate zero flag from alu
+  // jump if alu zero_flag, to pc + imm
+  output reg       conditional_jump,   // should jump if alu zero_flag correct
+  output reg [2:0] alu_jump_op,        // operation for alu for conditional jumps
+  output reg       alu_jump_negate,
+  output reg       alu_jump_add_one,   // add one for conditional jumps
+  output reg       jump_negate_zero,   // whether to negate zero flag from alu
 
   // whether to use immediate instead of rs2.
   // if false, immediate still may be added to second operand
@@ -57,8 +59,38 @@ module instruction_decoder(
   assign opcode = instruction[6:0];
 
   assign reg_rs1 = instruction[19:15];
+  assign reg_rs2 = instruction[24:20];
   assign reg_rd = instruction[11:7];
 
+  // load memory mask/size
+  always_comb begin
+    load_memory_size = 32;
+    load_memory_sign_extension = 1'b0;
+
+    case (funct3)
+      3'b000: begin
+        load_memory_size = 8; // sign extends
+        load_memory_sign_extension = 1'b1;
+      end
+      3'b001: begin
+        load_memory_size = 16; // sign extends
+        load_memory_sign_extension = 1'b1;
+      end
+      3'b010: begin
+        load_memory_size = 32; // sign extends
+        load_memory_sign_extension = 1'b1;
+      end
+      3'b100: begin
+        load_memory_size = 8; // zero extends
+      end
+      3'b101: begin
+        load_memory_size = 16; // zero extends
+      end
+      default : ;
+    endcase
+  end
+
+  // immediate load
   always_comb begin
     case (instruction_type)
       I : immediate = {20'b0, instruction[31:20]};
@@ -70,6 +102,7 @@ module instruction_decoder(
     endcase
   end
 
+  // alu subtraction
   always_comb begin
     alu_reg_add_one = 1'b0;
     alu_reg_negate = 1'b0;
@@ -80,27 +113,62 @@ module instruction_decoder(
     end
   end
 
+  // immediate instructions
   always_comb begin
     if (instruction_type == I ||
         instruction_type == U ||
         instruction_type == UJ ||
         instruction_type == S ||
         instruction_type == SB) begin
-      // TODO: does this make sense? is putting 0s to rs2 really needed? imm should
-      // be used always in this case
-      reg_rs2 = 5'b00000;
-      use_immediate = 1;
+      use_immediate = 1'b1;
     end
     else begin
-      reg_rs2 = instruction[24:20];
-      use_immediate = 0;
+      use_immediate = 1'b0;
     end
+  end
+
+  // conditional jump alu
+  always_comb begin
+    alu_jump_op = 3'b000;
+    alu_jump_add_one = 1'b0;
+    alu_jump_negate = 1'b0;
+    jump_negate_zero = 1'b0;
+
+    case (funct3)
+      3'b000 : begin // beq
+        // subtraction
+        alu_jump_op = 3'b000;
+        alu_jump_add_one = 1'b1;
+        alu_jump_negate = 1'b1;
+      end
+      3'b001 : begin // bne
+        // subtraction
+        alu_jump_op = 3'b000;
+        alu_jump_add_one = 1'b1;
+        alu_jump_negate = 1'b1;
+        jump_negate_zero = 1'b1;
+      end
+      3'b100 : begin // blt
+        alu_jump_op = 3'b010;
+        // less than 011
+      end
+      3'b101 : begin // bge
+        alu_jump_op = 3'b010;
+        jump_negate_zero = 1'b1;
+      end
+      3'b110 : begin // bltu
+        alu_jump_op = 3'b011;
+      end
+      3'b111 : begin // bgeu
+        alu_jump_op = 3'b011;
+        jump_negate_zero = 1'b1;
+      end
+      default : ;
+    endcase
   end
 
   assign alu_reg_op = funct3;
   assign alu_reg_signed = funct7[5];
-
-  assign mask = 32'b1;   // TODO (word, bit instructions, etc.)
 
   always_comb begin
      case (opcode[6:2])
@@ -130,7 +198,6 @@ module instruction_decoder(
     conditional_jump = 1'b0;
     unconditional_jump = 1'b0;
 
-    // TODO: support mask
     // TODO: multiplication
     // NOTE: ecall, ebreak, CSRRW, CSRRS, SCRRC, CSRRWI, CSRRSI, CSRRCI unsupported
     case (opcode[6:2])
@@ -152,7 +219,6 @@ module instruction_decoder(
         reg_we = 1'b1; // link #2
       end
       5'b11001 : begin // jump and link register
-        load_pc = 1'b1; // relative to pc
         unconditional_jump = 1'b1; // jump
         store_pc = 1'b1; // link #1
         reg_we = 1'b1; // link #2
