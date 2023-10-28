@@ -93,11 +93,11 @@ module instruction_decoder(
   // immediate load
   always_comb begin
     case (instruction_type)
-      I : immediate = {20'b0, instruction[31:20]};
-      S : immediate = {20'b0, instruction[31:25], instruction[11:7]};
-      SB : immediate = {19'b0, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
+      I : immediate = {{20{instruction[31]}}, instruction[31:20]};
+      S : immediate = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]};
+      SB : immediate = {{20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0};
       U : immediate = {instruction[31:12], 12'b0};
-      UJ : immediate = {11'b0, instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0};
+      UJ : immediate = {{12{instruction[31]}}, instruction[19:12], instruction[20], instruction[30:21], 1'b0};
       default: immediate = 32'b0;
     endcase
   end
