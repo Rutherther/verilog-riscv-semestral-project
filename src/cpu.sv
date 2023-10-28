@@ -1,8 +1,18 @@
 import cpu_types::*;
 
 module cpu(
-  input clk,
-  input rst_n
+  input             clk,
+  input             rst_n,
+
+  // program memory
+  input [31:0]      instruction,
+  output reg [31:0] pc,
+
+  // ram
+  input [31:0]      memory_address,
+  input [31:0]      memory_out,
+  output reg [31:0] memory_write,
+  output reg        memory_we
 );
   parameter WIDTH = 32;
 
@@ -25,10 +35,6 @@ module cpu(
   reg [31:0]  reg_write;
   wire [1:0]  reg_write_src;
   wire        reg_we;
-
-  wire [31:0] memory_address;
-  wire [31:0] memory_out, memory_write;
-  wire        memory_we;
 
   wire [31:0] immediate;
 
@@ -135,16 +141,16 @@ module cpu(
     .pc_next(pc_next[11:0])
   );
 
-  program_memory program_memory_inst(
-    .addr(pc[11:0]),
-    .instruction(instruction)
-  );
+  // program_memory program_memory_inst(
+  //   .addr(pc[11:0]),
+  //   .instruction(instruction)
+  // );
 
-  ram memory_inst(
-    .clk(clk),
-    .a(memory_address),
-    .we(memory_we),
-    .wd(memory_write),
-    .rd(memory_out)
-  );
+  // ram memory_inst(
+  //   .clk(clk),
+  //   .a(memory_address),
+  //   .we(memory_we),
+  //   .wd(memory_write),
+  //   .rd(memory_out)
+  // );
 endmodule
