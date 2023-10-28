@@ -19,14 +19,14 @@ module register_file(clk, a1, a2, a3, we3, wd3, rd1, rd2);
   wire          clk;
 
   always_comb begin
-    if (a1 == {ADDRESS_LENGTH{1'b0}})
+    if (a1 != {ADDRESS_LENGTH{1'b0}})
       rd1 = gprs[a1];
     else
       rd1 = 32'b0;
   end
 
   always_comb begin
-    if (a2 == {ADDRESS_LENGTH{1'b0}})
+    if (a2 != {ADDRESS_LENGTH{1'b0}})
       rd2 = gprs[a2];
     else
       rd2 = 32'b0;
