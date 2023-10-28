@@ -118,8 +118,7 @@ module instruction_decoder(
     if (instruction_type == I ||
         instruction_type == U ||
         instruction_type == UJ ||
-        instruction_type == S ||
-        instruction_type == SB) begin
+        instruction_type == S) begin
       use_immediate = 1'b1;
     end
     else begin
