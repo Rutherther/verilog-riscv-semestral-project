@@ -9,17 +9,14 @@ module cpu(
   output reg [31:0] pc,
 
   // ram
-  input [31:0]      memory_address,
+  output [31:0]     memory_address,
   input [31:0]      memory_out,
   output reg [31:0] memory_write,
   output reg        memory_we
 );
   parameter WIDTH = 32;
 
-  wire [31:0] instruction;
-
   reg [31:0]  pc_next;
-  wire [31:0] pc;
   wire        pc_src;
 
   reg [31:0]  alu_1, alu_2;
