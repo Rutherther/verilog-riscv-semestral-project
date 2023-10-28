@@ -1,36 +1,39 @@
 module register_file(clk, a1, a2, a3, we3, wd3, rd1, rd2);
+  parameter WIDTH = 32;
+  parameter ADDRESS_LENGTH = 5;
+  parameter SIZE = 1 << ADDRESS_LENGTH;
 
   input clk;
-  input [4:0] a1;
-  input [4:0] a2;
-  input [4:0] a3;
+  input [ADDRESS_LENGTH - 1:0] a1;
+  input [ADDRESS_LENGTH - 1:0] a2;
+  input [ADDRESS_LENGTH - 1:0] a3;
 
   input       we3; // write enable
-  input [31:0] wd3; // write data
+  input [WIDTH - 1:0] wd3; // write data
 
-  output reg [31:0] rd1;
-  output reg [31:0] rd2;
+  output reg [WIDTH - 1:0] rd1;
+  output reg [WIDTH - 1:0] rd2;
 
-  reg [31:0]    gprs [32];
+  reg [WIDTH - 1:0]    gprs [SIZE];
 
   wire          clk;
 
   always_comb begin
-    if (a1 == 5'b0)
+    if (a1 == {ADDRESS_LENGTH{1'b0}})
       rd1 = gprs[a1];
     else
       rd1 = 32'b0;
   end
 
   always_comb begin
-    if (a2 == 5'b0)
+    if (a2 == {ADDRESS_LENGTH{1'b0}})
       rd2 = gprs[a2];
     else
       rd2 = 32'b0;
   end
 
   always_ff @(posedge clk) begin
-    if (we3 && a3 != 5'b0)
+    if (we3 && a3 != {ADDRESS_LENGTH{1'b0}})
       gprs[a3] <= wd3;
   end
 
