@@ -106,7 +106,7 @@ module instruction_decoder(
   always_comb begin
     alu_reg_add_one = 1'b0;
     alu_reg_negate = 1'b0;
-    if (funct3 == 0 && funct7[5] == 1) begin
+    if (instruction_type == R && funct3 == 0 && funct7[5] == 1) begin
       // subtraction
       alu_reg_add_one = 1'b1;
       alu_reg_negate = 1'b1;
