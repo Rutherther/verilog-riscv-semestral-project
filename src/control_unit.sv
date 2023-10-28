@@ -47,6 +47,8 @@ module control_unit(
   wire       alu_reg_add_one, alu_reg_negate, alu_reg_signed;
   wire       alu_jump_add_one, alu_jump_negate;
 
+  assign jump_instruction = conditional_jump;
+
   instruction_decoder decoder(
     .instruction(instruction),
 
