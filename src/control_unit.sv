@@ -83,7 +83,12 @@ module control_unit(
     .reg_we(reg_we)
   );
 
-  assign alu_op = conditional_jump ? alu_jump_op : alu_reg_op;
+  // if jump, set alu_jump_op
+  // if loading or storing memory or loading pc, always add
+  // else do the register operation
+  assign alu_op = conditional_jump ? alu_jump_op :
+                  ((load_memory || memory_we || load_pc) ? 3'b000 :
+                  alu_reg_op);
   assign alu_add_one = conditional_jump ? alu_jump_add_one : alu_reg_add_one;
   assign alu_negate = conditional_jump ? alu_jump_negate : alu_reg_negate;
   assign alu_signed = conditional_jump ? 0 : alu_reg_signed;
