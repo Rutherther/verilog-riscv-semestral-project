@@ -13,6 +13,10 @@
               inherit system;
               config.allowUnfree = true;
             };
+            riscPkgs = import nixpkgs {
+              inherit system;
+              crossSystem.config = "riscv32-none-elf";
+            };
             verilog-toolchain = with pkgs; symlinkJoin {
               name = "verilog-toolchain";
               meta.mainProgram = "verilog";
@@ -31,11 +35,11 @@
           devShells.default = pkgs.mkShell {
             name = "pap-verilog";
 
-            nativeBuildInputs = [
-              packages.verilog
-            ];
-
             packages = with pkgs; [
+              riscPkgs.buildPackages.binutils
+              riscPkgs.buildPackages.gcc
+
+              packages.verilog
               # lsp
               packages.verilog-lsp
             ];
