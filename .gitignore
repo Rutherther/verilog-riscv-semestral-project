@@ -6,3 +6,9 @@ tmp/
 .direnv/
 obj_dir/
 *.vcd
+
+waves/
+programs/bin/
+*.o
+*.bin
+*.dat
