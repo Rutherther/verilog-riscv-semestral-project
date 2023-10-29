@@ -1,3 +1,5 @@
+import cpu_types::* ;
+
 module instruction_decoder(
   input [31:0]     instruction,
 
@@ -7,8 +9,8 @@ module instruction_decoder(
 
   // whether to load memory to rd
   output reg       load_memory,
-  output reg [5:0] load_memory_size,
-  output reg       load_memory_sign_extension,
+  output           memory_mask_t memory_mask,
+  output reg       memory_sign_extension,
 
   // put alu_jump to alu if conditional_jump
   //
@@ -64,27 +66,27 @@ module instruction_decoder(
 
   // load memory mask/size
   always_comb begin
-    load_memory_size = 32;
-    load_memory_sign_extension = 1'b0;
+    memory_mask = MEM_WORD;
+    memory_sign_extension = 1'b0;
 
     case (funct3)
       3'b000: begin
-        load_memory_size = 8; // sign extends
-        load_memory_sign_extension = 1'b1;
+        memory_mask = MEM_BYTE; // sign extends
+        memory_sign_extension = 1'b1;
       end
       3'b001: begin
-        load_memory_size = 16; // sign extends
-        load_memory_sign_extension = 1'b1;
+        memory_mask = MEM_HALFWORD; // sign extends
+        memory_sign_extension = 1'b1;
       end
       3'b010: begin
-        load_memory_size = 32; // sign extends
-        load_memory_sign_extension = 1'b1;
+        memory_mask = MEM_WORD; // sign extends
+        memory_sign_extension = 1'b1;
       end
       3'b100: begin
-        load_memory_size = 8; // zero extends
+        memory_mask = MEM_BYTE; // zero extends
       end
       3'b101: begin
-        load_memory_size = 16; // zero extends
+        memory_mask = MEM_HALFWORD; // zero extends
       end
       default : ;
     endcase
@@ -93,6 +95,7 @@ module instruction_decoder(
   // immediate load
   always_comb begin
     case (instruction_type)
+      // beware, slli, srai and srli, are I, but have funct7
       I : immediate = {{20{instruction[31]}}, instruction[31:20]};
       S : immediate = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]};
       SB : immediate = {{20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0};

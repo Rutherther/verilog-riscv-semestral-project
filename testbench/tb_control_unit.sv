@@ -27,6 +27,9 @@ module tb_control_unit();
   wire [4:0]  reg_rd;
   wire        reg_we;
 
+  memory_mask_t memory_mask;
+  wire memory_sign_extension;
+
   control_unit uut(
     .instruction(instruction),
     .memory_we(memory_we),
@@ -44,7 +47,9 @@ module tb_control_unit();
     .reg_rs2(reg_rs2),
     .reg_rd_src(reg_rd_src),
     .reg_rd(reg_rd),
-    .reg_we(reg_we)
+    .reg_we(reg_we),
+    .memory_mask(memory_mask),
+    .memory_sign_extension(memory_sign_extension)
   );
 
   initial begin
@@ -102,6 +107,9 @@ module tb_control_unit();
 
     #5 // lui
     instruction = {20'hA000A, 5'b00001, 7'b0110111};
+
+    #5
+    instruction = 32'b1000000000101111101011110010011;
 
 
     #5 $finish;

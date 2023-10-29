@@ -3,8 +3,8 @@ import cpu_types::*;
 module control_unit(
   input [31:0]  instruction,
 
-  // TODO: mask for: memory in and out
-  // don't forget zero extension, sign extension...
+  output        memory_mask_t memory_mask,
+  output        memory_sign_extension,
 
   // whether to save alu to memory
   output        memory_we,
@@ -47,6 +47,8 @@ module control_unit(
   wire       alu_reg_add_one, alu_reg_negate, alu_reg_signed;
   wire       alu_jump_add_one, alu_jump_negate;
 
+  wire       alu_override;
+
   assign jump_instruction = conditional_jump;
 
   instruction_decoder decoder(
@@ -55,8 +57,9 @@ module control_unit(
     .store_memory(memory_we),
 
     .load_memory(load_memory),
-    .load_memory_size(),
-    .load_memory_sign_extension(),
+
+    .memory_mask(memory_mask),
+    .memory_sign_extension(memory_sign_extension),
 
     .load_pc(load_pc),
     .store_pc(store_pc),

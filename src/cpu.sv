@@ -12,6 +12,7 @@ module cpu(
   output [31:0]     memory_address,
   input [31:0]      memory_out,
   output reg [31:0] memory_write,
+  output            memory_mask_t memory_mask,
   output reg        memory_we
 );
   parameter WIDTH = 32;
@@ -38,7 +39,23 @@ module cpu(
   wire        jump_instruction, jump_negate_zero;
   wire        jump_taken;
 
-  assign memory_write = reg_rd2;
+  wire        memory_sign_extension;
+
+  function bit[31:0] mem_sext_maybe;
+    input [31:0] num;
+    input        memory_mask_t mask;
+    input        sext;
+    begin
+      case(mask)
+        MEM_BYTE: return {{(32 - 8){sext & num[7]}}, num[7:0]};
+        MEM_HALFWORD: return {{(32 - 16){sext & num[15]}}, num[15:0]};
+        MEM_WORD: return num[31:0]; // rv32i, no 64 bit regs, no sign extension needed
+        default: return 0;
+      endcase
+    end
+  endfunction
+
+  assign memory_write = mem_sext_maybe(.num(reg_rd2), .mask(memory_mask), .sext(memory_sign_extension));
   assign memory_address = alu_out;
 
   // alu source 1
@@ -76,7 +93,7 @@ module cpu(
     case (reg_write_src)
       RD_ALU : reg_write = alu_out;
       RD_PC_PLUS : reg_write = pc + 4;
-      RD_MEMORY : reg_write = memory_out;
+      RD_MEMORY : reg_write = mem_sext_maybe(.num(memory_out), .mask(memory_mask), .sext(memory_sign_extension));
       default : ;
     endcase
   end
@@ -90,6 +107,9 @@ module cpu(
     .alu_add_one(alu_add_one),
     .alu_negate(alu_negate),
     .alu_signed(alu_signed),
+
+    .memory_mask(memory_mask),
+    .memory_sign_extension(memory_sign_extension),
 
     .memory_we(memory_we),
 

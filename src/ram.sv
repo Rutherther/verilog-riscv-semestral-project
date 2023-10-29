@@ -1,13 +1,23 @@
+import cpu_types::*;
+
 module ram (
   input         clk, we,
   input [31:0]  a, wd,
+  input         memory_mask_t mask,
   output [31:0] rd);
 
-  reg [31:0]    RAM[0:127];
+  reg [4095:0]    RAM;
 
-  assign rd = RAM[a[8:2]]; // word aligned
+  assign rd = RAM[a[11:0] +:32]; // word aligned
 
   always @(posedge clk)
-    if(we) RAM[a[8:2]] <= wd;
+    if(we) begin
+      case(mask)
+        MEM_BYTE: RAM[a[11:0] +:8] <= wd[7:0];
+        MEM_HALFWORD: RAM[a[11:0] +:16] <= wd[15:0];
+        MEM_WORD: RAM[{a[11:0]} +:32] <= wd[31:0];
+        default: ;
+      endcase
+    end
 
 endmodule
