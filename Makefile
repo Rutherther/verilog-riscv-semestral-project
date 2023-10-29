@@ -21,7 +21,7 @@ show: ./waves/$(MODULE).vcd
 ./waves:
 	mkdir -p $@
 
-./obj_dir/Vtb_%: testbench/tb_%.sv src/%.sv
+./obj_dir/Vtb_%: testbench/tb_%.sv src/*.sv
 	verilator --binary --trace \
 		src/cpu_types.sv \
 		src/instruction_decoder.sv \
@@ -64,7 +64,7 @@ OBJCOPY=riscv32-none-elf-objcopy
 ./programs/bin/%.dat: ./programs/bin/%.bin
 	od $< -t x4 -A n > $@
 
-objdump/%: ./programs/bin/%.bin
+objdump/%: ./programs/bin/start-%.o
 	$(OBJDUMP) -d -M no-aliases $<
 
 .PHONY: clean
