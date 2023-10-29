@@ -25,7 +25,7 @@ module tb_register_file();
   end
 
   initial begin
-    $dumpfile("register_file.vcd");
+    $dumpfile("waves/tb_register_file.vcd");
     $dumpvars;
     a1 = 0;
     a2 = 0;

@@ -87,7 +87,7 @@ module tb_cpu_simple();
   end
 
   initial begin
-    $dumpfile("cpu_simple.vcd");
+    $dumpfile("waves/tb_cpu_simple.vcd");
     $dumpvars;
 
     rst_n = 0;

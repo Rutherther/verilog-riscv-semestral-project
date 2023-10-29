@@ -19,7 +19,7 @@ module tb_alu();
   );
 
   initial begin
-    $dumpfile("alu_tb.vcd");
+    $dumpfile("waves/tb_alu.vcd");
     $dumpvars;
 
     a = 30;

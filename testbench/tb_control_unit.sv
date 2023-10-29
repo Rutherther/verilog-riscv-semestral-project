@@ -53,7 +53,7 @@ module tb_control_unit();
   );
 
   initial begin
-    $dumpfile("control_unit.vcd");
+    $dumpfile("waves/tb_control_unit.vcd");
     $dumpvars;
 
     // addi
