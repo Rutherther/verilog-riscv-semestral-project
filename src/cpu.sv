@@ -75,7 +75,7 @@ module cpu(
   end
 
   // pc source
-  assign jump_taken = jump_instruction && (alu_out[0] ^ jump_negate_zero);
+  assign jump_taken = jump_instruction && (alu_zero ^ jump_negate_zero);
   always_comb begin
     case (pc_src)
       PC_PLUS : begin

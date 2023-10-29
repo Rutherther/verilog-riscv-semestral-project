@@ -152,18 +152,18 @@ module instruction_decoder(
       end
       3'b100 : begin // blt
         alu_jump_op = 3'b010;
+        jump_negate_zero = 1'b1;
         // less than 011
       end
       3'b101 : begin // bge
         alu_jump_op = 3'b010;
-        jump_negate_zero = 1'b1;
       end
       3'b110 : begin // bltu
         alu_jump_op = 3'b011;
+        jump_negate_zero = 1'b1;
       end
       3'b111 : begin // bgeu
         alu_jump_op = 3'b011;
-        jump_negate_zero = 1'b1;
       end
       default : ;
     endcase
