@@ -23,6 +23,7 @@ show: ./waves/$(MODULE).vcd
 
 ./obj_dir/Vtb_%: testbench/tb_%.sv src/*.sv
 	verilator --binary --trace \
+		--trace-max-array 512 \
 		src/cpu_types.sv \
 		src/instruction_decoder.sv \
 		src/control_unit.sv \
