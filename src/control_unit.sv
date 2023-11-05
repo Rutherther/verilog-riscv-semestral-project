@@ -35,7 +35,9 @@ module control_unit(
   // alu or memory
   output        reg_rd_source_t reg_rd_src,
   output [4:0]  reg_rd,
-  output        reg_we
+  output        reg_we,
+
+  output        ebreak
 );
 
   wire use_immediate;
@@ -53,6 +55,8 @@ module control_unit(
 
   instruction_decoder decoder(
     .instruction(instruction),
+
+    .ebreak(ebreak),
 
     .store_memory(memory_we),
 

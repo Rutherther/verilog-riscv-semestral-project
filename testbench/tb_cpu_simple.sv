@@ -11,6 +11,8 @@ module tb_cpu_simple();
   wire [31:0] pc;
   reg [31:0]  instruction;
 
+  wire        ebreak;
+
   cpu uut(
     .clk(clk),
     .rst_n(rst_n),
@@ -22,7 +24,9 @@ module tb_cpu_simple();
     .memory_out(memory_out),
     .memory_write(memory_write),
     .memory_byte_enable(memory_write_byte_enable),
-    .memory_we(memory_we)
+    .memory_we(memory_we),
+
+    .ebreak(ebreak)
   );
 
   ram memory_inst(
@@ -33,6 +37,10 @@ module tb_cpu_simple();
     .wd(memory_write),
     .rd(memory_out)
   );
+
+  always_ff @ (posedge ebreak) begin
+    #15 $finish;
+  end
 
   always_comb begin
     case(pc[5:2])
@@ -92,7 +100,5 @@ module tb_cpu_simple();
     rst_n = 0;
     #20
     rst_n = 1;
-
-    #300 $finish;
   end
 endmodule

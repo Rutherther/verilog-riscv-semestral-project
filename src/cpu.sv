@@ -13,7 +13,9 @@ module cpu(
   input [31:0]      memory_out,
   output reg [31:0] memory_write,
   output [3:0]      memory_byte_enable,
-  output reg        memory_we
+  output reg        memory_we,
+
+  output ebreak
 );
   parameter WIDTH = 32;
 
@@ -92,15 +94,18 @@ module cpu(
   // pc source
   assign jump_taken = jump_instruction && (alu_zero ^ jump_negate_zero);
   always_comb begin
-    case (pc_src)
-      PC_PLUS : begin
-        if (jump_taken)
-          pc_next = pc + immediate;
-        else
-          pc_next = pc + 4;
-      end
-      PC_ALU : pc_next = alu_out;
-    endcase
+    if (ebreak)
+      pc_next = pc;
+    else
+      case (pc_src)
+        PC_PLUS : begin
+          if (jump_taken)
+            pc_next = pc + immediate;
+          else
+            pc_next = pc + 4;
+        end
+        PC_ALU : pc_next = alu_out;
+      endcase
   end
 
   // register file write source
@@ -116,6 +121,8 @@ module cpu(
 
   control_unit control_unit_inst(
     .instruction(instruction),
+
+    .ebreak(ebreak),
 
     .immediate(immediate),
 

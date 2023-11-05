@@ -10,6 +10,8 @@ module tb_cpu_branches();
   wire [31:0] pc;
   reg [31:0]  instruction;
 
+  wire        ebreak;
+
   cpu uut(
     .clk(clk),
     .rst_n(rst_n),
@@ -21,7 +23,9 @@ module tb_cpu_branches();
     .memory_out(memory_out),
     .memory_write(memory_write),
     .memory_byte_enable(memory_write_byte_enable),
-    .memory_we(memory_we)
+    .memory_we(memory_we),
+
+    .ebreak(ebreak)
   );
 
   ram memory_inst(
@@ -38,6 +42,10 @@ module tb_cpu_branches();
     .instruction(instruction)
   );
 
+  always_ff @ (posedge ebreak) begin
+    #15 $finish;
+  end
+
   initial begin
     clk = 0;
     forever #5 clk = ~clk;
@@ -50,7 +58,5 @@ module tb_cpu_branches();
     rst_n = 0;
     #20
     rst_n = 1;
-
-    #500 $finish;
   end
 endmodule

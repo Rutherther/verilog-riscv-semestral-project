@@ -47,7 +47,9 @@ module instruction_decoder(
   output [4:0]     reg_rs1,
   output reg [4:0] reg_rs2,
   output [4:0]     reg_rd,
-  output           reg_we
+  output           reg_we,
+
+  output reg       ebreak
 );
   typedef enum bit[2:0] {Unknown, R, I, S, SB, U, UJ} instruction_type_type;
   instruction_type_type instruction_type;
@@ -199,6 +201,7 @@ module instruction_decoder(
     reg_we = 1'b1;
     conditional_jump = 1'b0;
     unconditional_jump = 1'b0;
+    ebreak = 1'b0;
 
     // TODO: multiplication
     // NOTE: ecall, ebreak, CSRRW, CSRRS, SCRRC, CSRRWI, CSRRSI, CSRRCI unsupported
@@ -231,6 +234,10 @@ module instruction_decoder(
       5'b00101 : begin // add upper imm to PC
         load_pc = 1'b1;
         reg_we = 1'b1;
+      end
+      5'b11100 : begin
+        if (funct3 == 3'b0)
+          ebreak = 1'b1;
       end
       default : ;
     endcase;
