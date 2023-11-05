@@ -39,6 +39,9 @@ void main()
 
     #ifdef unix
     printf("%d\n", res);
+    #else
+    int* result_address = 0;
+    *result_address = res;
     #endif
 
 }

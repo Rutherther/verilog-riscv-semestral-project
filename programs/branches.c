@@ -1,43 +1,42 @@
 void main()
 {
+    int *result_address = 0;
     int a = 1;
     int b = 5;
-    int c = 0;
 
     if (a < b) {
-        c = 1;
+        *result_address = 1;
     } else {
-        c = 2;
+        *result_address = 2;
     }
 
     if (a >= b) {
-        c = 1;
+        *result_address = 1;
     } else {
-        c = 2;
+        *result_address = 2;
     }
 
     if (a != b) {
-        c = 1;
+        *result_address = 1;
     } else {
-        c = 2;
+        *result_address = 2;
     }
 
     if (a == b) {
-        c = 1;
+        *result_address = 1;
     } else {
-        c = 2;
+        *result_address = 2;
     }
 
     if (a <= b) {
-        c = 1;
+        *result_address = 1;
     } else {
-        c = 2;
+        *result_address = 2;
     }
 
     if (a > b) {
-        c = 1;
+        *result_address = 1;
     } else {
-        c = 2;
+        *result_address = 2;
     }
-
 }
