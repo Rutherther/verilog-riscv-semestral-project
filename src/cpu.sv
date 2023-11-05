@@ -12,7 +12,7 @@ module cpu(
   output [31:0]     memory_address,
   input [31:0]      memory_out,
   output reg [31:0] memory_write,
-  output            memory_mask_t memory_mask,
+  output [3:0]      memory_byte_enable,
   output reg        memory_we
 );
   parameter WIDTH = 32;
@@ -41,6 +41,8 @@ module cpu(
 
   wire        memory_sign_extension;
 
+  memory_mask_t memory_mask;
+
   function bit[31:0] mem_sext_maybe;
     input [31:0] num;
     input        memory_mask_t mask;
@@ -55,7 +57,20 @@ module cpu(
     end
   endfunction
 
-  assign memory_write = mem_sext_maybe(.num(reg_rd2), .mask(memory_mask), .sext(memory_sign_extension));
+  function bit[3:0] mask_to_mask_bytes;
+    input memory_mask_t mask;
+    begin
+      case(mask)
+        MEM_BYTE: return 4'b0001;
+        MEM_HALFWORD: return 4'b0011;
+        MEM_WORD: return 4'b1111;
+        default: return 0;
+      endcase
+    end
+  endfunction
+
+  assign memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) << memory_address[1:0];
+  assign memory_write = reg_rd2 << (8*memory_address[1:0]);
   assign memory_address = alu_out;
 
   // alu source 1
@@ -89,11 +104,12 @@ module cpu(
   end
 
   // register file write source
+  // TODO forwarding pipelined, split to two instead
   always_comb begin
     case (reg_write_src)
       RD_ALU : reg_write = alu_out;
       RD_PC_PLUS : reg_write = pc + 4;
-      RD_MEMORY : reg_write = mem_sext_maybe(.num(memory_out), .mask(memory_mask), .sext(memory_sign_extension));
+      RD_MEMORY : reg_write = mem_sext_maybe(.num(memory_out >> (8*memory_address[1:0])), .mask(memory_mask), .sext(memory_sign_extension));
       default : ;
     endcase
   end

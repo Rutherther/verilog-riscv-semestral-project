@@ -4,9 +4,8 @@ module tb_cpu_gcd();
   reg clk, rst_n;
 
   wire [31:0] memory_address, memory_write, memory_out;
+  wire [3:0]  memory_write_byte_enable;
   wire        memory_we;
-
-  memory_mask_t memory_mask;
 
   wire [31:0] pc;
   reg [31:0]  instruction;
@@ -21,14 +20,14 @@ module tb_cpu_gcd();
     .memory_address(memory_address),
     .memory_out(memory_out),
     .memory_write(memory_write),
-    .memory_mask(memory_mask),
+    .memory_byte_enable(memory_write_byte_enable),
     .memory_we(memory_we)
   );
 
   ram memory_inst(
     .clk(clk),
     .a(memory_address),
-    .mask(memory_mask),
+    .write_byte_enable(memory_write_byte_enable),
     .we(memory_we),
     .wd(memory_write),
     .rd(memory_out)
