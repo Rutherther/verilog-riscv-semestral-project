@@ -1,0 +1,11 @@
+src/cpu_types.sv
+src/instruction_decoder.sv
+src/control_unit.sv
+src/alu.sv
+src/register_file.sv
+src/program_counter.sv
+src/ram.sv
+src/cpu.sv
+src/file_program_memory.sv
+
+testbench/tb_cpu_program.sv
