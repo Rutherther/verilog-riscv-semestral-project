@@ -14,3 +14,5 @@ programs/bin/
 *.o
 *.bin
 *.dat
+
+__pycache__/
