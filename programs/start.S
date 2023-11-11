@@ -2,8 +2,8 @@
 
 .text
 _start:
-    addi sp, x0, 124
+    addi sp, x0, 1020
     call main
-_loop:
+loop:
     ebreak
-    j _loop
+    j loop
