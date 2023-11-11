@@ -15,11 +15,35 @@ build: obj_dir/V$(MODULE)
 show: ./waves/$(MODULE).vcd
 	gtkwave ./waves/$(MODULE).vcd
 
+./waves/cpu_program_%.vcd: ./obj_dir/Vtb_cpu_program_% ./waves
+	$<
+
 ./waves/%.vcd: ./obj_dir/V% ./waves
 	$<
 
 ./waves:
 	mkdir -p $@
+
+# These are runtime dependencies, not build time dependencies.
+.PRECIOUS: ./programs/bin/%.dat ./programs/bin/%.bin
+
+./obj_dir/Vtb_cpu_program_%: ./programs/bin/%.dat testbench/tb_cpu_program.sv src/*.sv
+	verilator --binary --trace \
+		-GCPU_PROGRAM_PATH="\"$<\"" \
+		-GCPU_PROGRAM_NAME="\"$(notdir $(basename $<))\"" \
+		--trace-max-array 512 \
+		src/cpu_types.sv \
+		src/instruction_decoder.sv \
+		src/control_unit.sv \
+		src/alu.sv \
+		src/register_file.sv \
+		src/program_counter.sv \
+		src/ram.sv \
+		src/cpu.sv \
+		src/file_program_memory.sv \
+		testbench/tb_cpu_program.sv \
+		-o Vtb_cpu_program_$(notdir $(basename $<)) \
+		--top tb_cpu_program
 
 ./obj_dir/Vtb_%: testbench/tb_%.sv src/*.sv
 	verilator --binary --trace \

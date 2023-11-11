@@ -1,6 +1,6 @@
 import cpu_types::*;
 
-module tb_cpu_branches();
+module tb_cpu_program();
   reg clk, rst_n;
 
   wire [31:0] memory_address, memory_write, memory_out;
@@ -11,6 +11,9 @@ module tb_cpu_branches();
   reg [31:0]  instruction;
 
   wire        ebreak;
+
+  parameter string  CPU_PROGRAM_PATH;
+  parameter string  CPU_PROGRAM_NAME;
 
   cpu uut(
     .clk(clk),
@@ -37,7 +40,7 @@ module tb_cpu_branches();
     .rd(memory_out)
   );
 
-  file_program_memory #(.FILE_NAME("programs/bin/branches.dat")) prog_mem_inst(
+  file_program_memory #(.FILE_NAME(CPU_PROGRAM_PATH)) prog_mem_inst(
     .addr(pc[11:0]),
     .instruction(instruction)
   );
@@ -52,7 +55,7 @@ module tb_cpu_branches();
   end
 
   initial begin
-    $dumpfile("waves/tb_cpu_branches.vcd");
+    $dumpfile({"waves/cpu_program_", CPU_PROGRAM_NAME, ".vcd"});
     $dumpvars;
 
     rst_n = 0;

@@ -3,7 +3,7 @@ module file_program_memory
   input [WIDTH - 1:0] addr,
   output [31:0] instruction
 );
-  parameter FILE_NAME = "memfile.dat";
+  parameter string FILE_NAME;
   parameter WIDTH = 12;
   parameter MEM_SIZE = 1 << (WIDTH - 2) - 1;
 
