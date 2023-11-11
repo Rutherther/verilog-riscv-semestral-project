@@ -2,7 +2,7 @@
   description = "PAP verilog environment";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -17,31 +17,29 @@
               inherit system;
               crossSystem.config = "riscv32-none-elf";
             };
-            verilog-toolchain = with pkgs; symlinkJoin {
-              name = "verilog-toolchain";
-              meta.mainProgram = "verilog";
-              paths = [
-                verilog
-                verilator
-                gtkwave
-              ];
-            };
         in rec {
-
-          packages.verilog = verilog-toolchain;
-          packages.verilog-lsp = pkgs.svls;
-          packages.default = packages.verilog;
-
           devShells.default = pkgs.mkShell {
-            name = "pap-verilog";
+            name = "pap-processor-singlecycle";
 
-            packages = with pkgs; [
+            packages = [
+              # verilog simulation
+              pkgs.verilog
+              pkgs.verilator
+
+              # wave viewer
+              pkgs.gtkwave
+
+              # riscv toolchain
+              # building c, assembly
               riscPkgs.buildPackages.binutils
               riscPkgs.buildPackages.gcc
 
-              packages.verilog
+              # for testing
+              pkgs.python3
+
               # lsp
-              packages.verilog-lsp
+              pkgs.svls
+              pkgs.pyright
             ];
           };
         }
