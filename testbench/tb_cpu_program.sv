@@ -3,7 +3,7 @@ import cpu_types::*;
 module tb_cpu_program();
   reg clk, rst_n;
 
-  wire [31:0] memory_address, memory_write, memory_out;
+  wire [31:0] memory_address, cpu_memory_address, memory_write, memory_out;
   wire [3:0]  memory_write_byte_enable;
   wire        memory_we;
 
@@ -15,6 +15,14 @@ module tb_cpu_program();
   parameter string  CPU_PROGRAM_PATH;
   parameter string  CPU_PROGRAM_NAME;
 
+  parameter         MEMORY_LOAD_FILE = 0;
+  parameter string  MEMORY_LOAD_FILE_PATH = "";
+  parameter         MEMORY_WRITE_FILE = 0;
+  parameter string  MEMORY_WRITE_FILE_PATH = "";
+
+  // assign 0xFF... when ebreak. To save the memory to a file.
+  assign memory_address = ebreak == 1'b1 ? {32{1'b1}} : cpu_memory_address;
+
   cpu uut(
     .clk(clk),
     .rst_n(rst_n),
@@ -22,7 +30,7 @@ module tb_cpu_program();
     .instruction(instruction),
     .pc(pc),
 
-    .memory_address(memory_address),
+    .memory_address(cpu_memory_address),
     .memory_out(memory_out),
     .memory_write(memory_write),
     .memory_byte_enable(memory_write_byte_enable),
@@ -31,7 +39,12 @@ module tb_cpu_program();
     .ebreak(ebreak)
   );
 
-  ram memory_inst(
+  ram #(
+    .LOAD_FILE(MEMORY_LOAD_FILE),
+    .LOAD_FILE_PATH(MEMORY_LOAD_FILE_PATH),
+    .WRITE_FILE(MEMORY_WRITE_FILE),
+    .WRITE_FILE_PATH(MEMORY_WRITE_FILE_PATH)
+  ) memory_inst(
     .clk(clk),
     .a(memory_address),
     .write_byte_enable(memory_write_byte_enable),
@@ -40,12 +53,15 @@ module tb_cpu_program();
     .rd(memory_out)
   );
 
-  file_program_memory #(.FILE_NAME(CPU_PROGRAM_PATH)) prog_mem_inst(
+  file_program_memory #(
+    .FILE_NAME(CPU_PROGRAM_PATH)
+  ) prog_mem_inst(
     .addr(pc[11:0]),
     .instruction(instruction)
   );
 
   always_ff @ (posedge ebreak) begin
+    $display("ebreak!");
     #15 $finish;
   end
 

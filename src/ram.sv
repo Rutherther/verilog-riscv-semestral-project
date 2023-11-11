@@ -7,9 +7,14 @@ module ram (
   output [31:0] rd);
 
   reg [31:0]      mask;
-  reg [31:0]      memory[128];
+  reg [31:0]      memory[1023];
 
-  assign rd = memory[a[8:2]]; // word aligned
+  assign rd = memory[a[11:2]]; // word aligned
+
+  parameter        LOAD_FILE = 0;
+  parameter string LOAD_FILE_PATH = "";
+  parameter        WRITE_FILE = 0;
+  parameter string WRITE_FILE_PATH = "";
 
   always_comb begin
     mask = {
@@ -20,8 +25,23 @@ module ram (
             };
   end
 
+  initial
+    if (LOAD_FILE == 1) begin
+      $display("Loading file %s into memory.", LOAD_FILE_PATH);
+      $readmemh(LOAD_FILE_PATH, memory);
+    end
+
+  initial begin
+    if (WRITE_FILE == 1) begin
+      wait (a == {32{1'b1}});
+      #5
+      $display("Writing memory to file %s.", WRITE_FILE_PATH);
+      $writememh(WRITE_FILE_PATH, memory);
+    end
+  end
+
   always_ff @ (posedge clk)
     if(we)
-      memory[a[8:2]] = (rd & ~mask) | (wd & mask);
+      memory[a[11:2]] = (rd & ~mask) | (wd & mask);
 
 endmodule
