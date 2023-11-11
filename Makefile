@@ -87,7 +87,7 @@ OBJCOPY=riscv32-none-elf-objcopy
 	$(OBJCOPY) $< -O binary $@
 
 ./programs/bin/%.dat: ./programs/bin/%.bin
-	od $< -t x4 -A n > $@
+	od $< -t x4 -A n -v > $@
 
 objdump/%: ./programs/bin/start-%.o
 	$(OBJDUMP) -d -M no-aliases $<
@@ -98,3 +98,5 @@ clean:
 	rm -rf ./programs/bin
 	rm -rf ./obj_dir
 	rm -rf waveform.vcd
+	rm -rf tests/out
+	make -C tests/official clean

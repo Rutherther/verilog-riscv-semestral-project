@@ -4,7 +4,7 @@ module file_program_memory
   output [31:0] instruction
 );
   parameter string FILE_NAME;
-  parameter WIDTH = 12;
+  parameter WIDTH = 15;
   parameter MEM_SIZE = 1 << (WIDTH - 2) - 1;
 
   reg [31:0] imem[0:MEM_SIZE];

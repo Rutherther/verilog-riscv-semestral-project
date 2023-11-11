@@ -56,12 +56,12 @@ module tb_cpu_program();
   file_program_memory #(
     .FILE_NAME(CPU_PROGRAM_PATH)
   ) prog_mem_inst(
-    .addr(pc[11:0]),
+    .addr(pc[14:0]),
     .instruction(instruction)
   );
 
   always_ff @ (posedge ebreak) begin
-    $display("ebreak!");
+    $display("ebreak at %d", pc);
     #15 $finish;
   end
 
