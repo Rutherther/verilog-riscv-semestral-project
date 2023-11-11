@@ -5,6 +5,7 @@ import argparse
 import sys
 import subprocess
 import re
+import shutil
 from pathlib import Path
 
 from test_types import bcolors, TestGroup, Test, Validation
@@ -31,14 +32,18 @@ def validate_test(test: Test) -> Validation:
         matches = (actual_arr == expected_arr)
     )
 
-def compile_test(project_dir: Path, comp_list: Path, out_dir: Path, test: Test) -> bool:
+def compile(project_dir: Path, comp_list: Path, out_dir: Path) -> bool:
+    program_path = out_dir / "program.dat"
+    memory_write_file = out_dir / "memory_out.dat"
+    memory_load_file = out_dir / "memory_in.dat"
+
     generics = {
-        'CPU_PROGRAM_PATH': f"\\\"{test.group.dat_test_file}\\\"",
-        'CPU_PROGRAM_NAME': f"\\\"{test.group.dat_test_file.stem}\\\"",
+        'CPU_PROGRAM_PATH': f"\\\"{program_path}\\\"",
+        'CPU_PROGRAM_NAME': f"\\\"testcase\\\"",
         'MEMORY_LOAD_FILE': 1,
-        'MEMORY_LOAD_FILE_PATH': f"\\\"{test.input_file}\\\"",
+        'MEMORY_LOAD_FILE_PATH': f"\\\"{memory_load_file}\\\"",
         'MEMORY_WRITE_FILE': 1,
-        'MEMORY_WRITE_FILE_PATH': f"\\\"{test.output_file}\\\"",
+        'MEMORY_WRITE_FILE_PATH': f"\\\"{memory_write_file}\\\"",
     }
 
     params = []
@@ -49,7 +54,7 @@ def compile_test(project_dir: Path, comp_list: Path, out_dir: Path, test: Test) 
     params.append("--Mdir")
     params.append(f"{out_dir}")
     params.append("-o")
-    params.append(f"test_{test.group.name}_{test.name}")
+    params.append(f"simulate_cpu_program")
     params.append("--top")
     params.append("tb_cpu_program")
 
@@ -65,12 +70,23 @@ def compile_test(project_dir: Path, comp_list: Path, out_dir: Path, test: Test) 
     ).returncode == 0
 
 def run_test(out_dir: Path, test: Test) -> bool:
-    return subprocess.run(
-        [out_dir / f"test_{test.group.name}_{test.name}"],
+    program_path = out_dir / "program.dat"
+    memory_write_file = out_dir / "memory_out.dat"
+    memory_load_file = out_dir / "memory_in.dat"
+
+    shutil.copy(test.input_file, memory_load_file)
+    shutil.copy(test.group.dat_test_file, program_path)
+
+    subprocess.run(
+        [out_dir / f"simulate_cpu_program"],
         stdout = subprocess.DEVNULL,
         shell = True,
         check = True,
-    ).returncode == 0
+    )
+
+    shutil.copy(memory_write_file, test.output_file)
+
+    return True
 
 # Program
 parser = argparse.ArgumentParser("Test simple RISC-V processor written in Verilog.")
@@ -105,6 +121,8 @@ groups_dir = here / "custom"
 # TODO support multiple tests
 group_name, test_name = args.filter[0].split('.') if args.filter is not None else (None, None)
 
+compile(project_dir, here / "comp_list.lst", out_dir)
+
 if args.type == "custom":
     test_groups: list[TestGroup] = custom_tests.find_tests(
         groups_dir, programs_dir, out_dir, group_name, test_name
@@ -119,7 +137,6 @@ if args.type == "custom":
     for group in test_groups:
         custom_tests.compile_program(project_dir, group)
         for test in group.tests:
-            compile_test(project_dir, here / "comp_list.lst", out_dir, test)
             run_test(out_dir, test)
 
             validation = validate_test(test)
@@ -144,7 +161,6 @@ else: # official
     for group in test_groups:
         for test in group.tests:
             official_tests.compile_program(project_dir, test)
-            compile_test(project_dir, here / "comp_list.lst", out_dir, test)
             run_test(out_dir, test)
 
             validation = validate_test(test)

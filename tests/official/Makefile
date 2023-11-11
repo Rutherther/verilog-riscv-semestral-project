@@ -2,7 +2,7 @@ XLEN = 32
 src_dir = .
 isa_dir = ./riscv-tests/isa
 
-CFLAGS=-march=rv32i -mabi=ilp32 -c
+CFLAGS=-march=rv32i_zifencei -mabi=ilp32 -c
 
 CC=riscv32-none-elf-gcc
 LD=riscv32-none-elf-ld
