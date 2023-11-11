@@ -14,7 +14,7 @@ module register_file(clk, a1, a2, a3, we3, wd3, rd1, rd2);
   output reg [WIDTH - 1:0] rd1;
   output reg [WIDTH - 1:0] rd2;
 
-  reg [WIDTH - 1:0]    gprs [SIZE];
+  reg [WIDTH - 1:0]    gprs [1:SIZE-1];
 
   wire          clk;
 
