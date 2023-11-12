@@ -8,9 +8,9 @@ module ram (
   output [31:0] rd);
 
   reg [31:0]      mask;
-  reg [31:0]      memory[1023];
+  reg [31:0]      memory[8092];
 
-  assign rd = memory[a[11:2]]; // word aligned
+  assign rd = memory[a[14:2]]; // word aligned
 
   parameter        LOAD_FILE = 0;
   parameter string LOAD_FILE_PATH = "";
@@ -43,6 +43,6 @@ module ram (
 
   always_ff @ (posedge clk)
     if(we)
-      memory[a[11:2]] = (rd & ~mask) | (wd & mask);
+      memory[a[14:2]] = (rd & ~mask) | (wd & mask);
 
 endmodule
