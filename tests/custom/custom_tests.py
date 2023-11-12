@@ -6,12 +6,12 @@ sys.path.append('../')
 from test_types import *
 from pathlib import Path
 
-def find_tests(groups_dir: Path, programs_dir: Path, out_dir: Path, group_name: str|None, test_name: str|None) -> list[TestGroup]:
+def find_tests(groups_dir: Path, programs_dir: Path, out_dir: Path, filter_group_name: str|None, filter_test_name: str|None) -> list[TestGroup]:
     group_names: list[Path] = []
-    if group_name is None:
+    if filter_group_name is None:
         group_names = [f for f in groups_dir.iterdir() if f.is_dir()]
     else:
-        group_names = [groups_dir / group_name]
+        group_names = [groups_dir / filter_group_name]
 
     groups: list[TestGroup] = []
     for group_dir in group_names:
@@ -25,10 +25,10 @@ def find_tests(groups_dir: Path, programs_dir: Path, out_dir: Path, group_name: 
         )
 
         test_names = []
-        if test_name is None:
+        if filter_test_name is None:
             test_names = [f.name[:-len("-input.dat")] for f in group_dir.iterdir() if f.is_file() and f.name.endswith("-input.dat")]
         else:
-            test_names = [test_name]
+            test_names = [filter_test_name]
 
         for test_name in test_names:
             test = Test(
@@ -41,6 +41,7 @@ def find_tests(groups_dir: Path, programs_dir: Path, out_dir: Path, group_name: 
             )
 
             if not test.memory_in_file.exists() or not test.memory_exp_file.exists():
+                print("could not find both input and expected")
                 continue
 
             tests.append(test)

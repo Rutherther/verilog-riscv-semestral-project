@@ -29,8 +29,11 @@ def validate_test(test: Test) -> Validation:
 
     expected_arr = list(filter(lambda word: word != "", re.split(r"[\n ]+", expected)))
     actual_arr = re.split(r"[\n ]+", actual)
-    # trim leading
+    # ignore rest of memory
     actual_arr = actual_arr[:len(expected_arr)]
+
+    actual_arr = [item.upper() for item in actual_arr]
+    expected_arr = [item.upper() for item in expected_arr]
 
     return Validation(
         test = test,
