@@ -23,7 +23,7 @@ module alu(
 
     case (op)
       3'b000 : out = a + real_b;
-      3'b001 : out = a << real_b;
+      3'b001 : out = a << real_b[4:0];
       3'b010 : out = (signed'(a) < signed'(real_b)) ? 1 : 0;
       3'b011 : out = (a < real_b) ? 1 : 0;
       3'b100 : out = a ^ real_b;
