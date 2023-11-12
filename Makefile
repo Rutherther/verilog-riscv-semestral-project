@@ -30,7 +30,7 @@ show: ./waves/$(MODULE).vcd
 ./obj_dir/Vtb_cpu_program_%: ./programs/bin/%.dat testbench/tb_cpu_program.sv src/*.sv
 	verilator --binary --trace \
 		-GCPU_PROGRAM_PATH="\"$<\"" \
-		-GCPU_PROGRAM_NAME="\"$(notdir $(basename $<))\"" \
+		-GTRACE_FILE_PATH="\"waves/cpu_program_$(notdir $(basename $<)).vcd\"" \
 		--trace-max-array 512 \
 		src/cpu_types.sv \
 		src/instruction_decoder.sv \
