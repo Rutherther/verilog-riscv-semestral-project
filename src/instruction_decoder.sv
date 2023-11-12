@@ -41,6 +41,7 @@ module instruction_decoder(
   // whether to use immediate instead of rs2.
   // if false, immediate still may be added to second operand
   output           use_immediate,
+  output           load_immediate,
   output [31:0]    immediate,
 
   // inputs to register file
@@ -61,10 +62,6 @@ module instruction_decoder(
   assign funct3 = instruction[14:12];
   assign funct7 = instruction[31:25];
   assign opcode = instruction[6:0];
-
-  assign reg_rs1 = instruction[19:15];
-  assign reg_rs2 = instruction[24:20];
-  assign reg_rd = instruction[11:7];
 
   // load memory mask/size
   always_comb begin
@@ -201,7 +198,12 @@ module instruction_decoder(
     reg_we = 1'b1;
     conditional_jump = 1'b0;
     unconditional_jump = 1'b0;
+    load_immediate = 1'b0;
     ebreak = 1'b0;
+
+    reg_rs1 = instruction[19:15];
+    reg_rs2 = instruction[24:20];
+    reg_rd = instruction[11:7];
 
     // TODO: multiplication
     // NOTE: ecall, ebreak, CSRRW, CSRRS, SCRRC, CSRRWI, CSRRSI, CSRRCI unsupported
@@ -230,6 +232,8 @@ module instruction_decoder(
       end
       5'b01101 : begin // load upper imm
         reg_we = 1'b1;
+        load_immediate = 1'b1;
+        reg_rs1 = 5'b0;
       end
       5'b00101 : begin // add upper imm to PC
         load_pc = 1'b1;

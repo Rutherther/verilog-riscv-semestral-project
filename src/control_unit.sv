@@ -41,6 +41,7 @@ module control_unit(
 );
 
   wire use_immediate;
+  wire load_immediate;
   wire load_memory;
   wire load_pc, store_pc;
   wire conditional_jump, unconditional_jump;
@@ -83,6 +84,7 @@ module control_unit(
 
     .immediate(immediate),
     .use_immediate(use_immediate),
+    .load_immediate(load_immediate),
 
     .reg_rs1(reg_rs1),
     .reg_rs2(reg_rs2),
@@ -92,7 +94,7 @@ module control_unit(
 
   // in these cases, alu is used just for addition, nothing else,
   // so use neither alu_jump, neither alu_reg, use zeros
-  assign alu_override = load_memory || memory_we || load_pc || unconditional_jump;
+  assign alu_override = load_memory || memory_we || load_pc || unconditional_jump || load_immediate;
 
   assign alu_op = conditional_jump ? alu_jump_op :
                   alu_override     ? 3'b000      :
