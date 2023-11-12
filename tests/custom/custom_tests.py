@@ -37,9 +37,10 @@ def find_tests(groups_dir: Path, programs_dir: Path, out_dir: Path, group_name: 
                 group_dir / f"{test_name}-input.dat",
                 out_dir / f"{test_name}-output.dat",
                 group_dir / f"{test_name}-expected.dat",
+                out_dir / f"{test_name}-registers.dat",
             )
 
-            if not test.input_file.exists() or not test.expected_file.exists():
+            if not test.memory_in_file.exists() or not test.memory_exp_file.exists():
                 continue
 
             tests.append(test)
@@ -49,7 +50,8 @@ def find_tests(groups_dir: Path, programs_dir: Path, out_dir: Path, group_name: 
 
     return groups
 
-def compile_program(make_dir: Path, group: TestGroup) -> bool:
+def compile_program(make_dir: Path, test: Test) -> bool:
+    group = test.group
     return subprocess.run(
         ["make", "-C", make_dir, group.dat_test_file.relative_to(make_dir)],
         stdout = subprocess.DEVNULL,

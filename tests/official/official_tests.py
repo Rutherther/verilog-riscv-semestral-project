@@ -29,9 +29,10 @@ def find_tests(out_dir: Path) -> list[TestGroup]:
         tests.append(Test(
             group = group,
             name = test_name,
-            input_file = here / "input.dat",
-            output_file = out_dir / f"{group.name}-output.dat",
-            expected_file = here / "expected.dat",
+            memory_in_file = out_dir / f"rv32ui_{test_name}.dat",
+            memory_out_file = out_dir / f"rv32ui_{test_name}_output.dat",
+            memory_exp_file = here / "expected.dat",
+            register_dump_file = out_dir / f"rv32ui_{test_name}_registers.dat"
         ))
 
         groups.append(group)

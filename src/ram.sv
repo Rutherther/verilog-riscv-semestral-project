@@ -4,6 +4,7 @@ module ram (
   input         clk, we,
   input [31:0]  a, wd,
   input [3:0]   write_byte_enable,
+  input         dump,
   output [31:0] rd);
 
   reg [31:0]      mask;
@@ -33,7 +34,7 @@ module ram (
 
   initial begin
     if (WRITE_FILE == 1) begin
-      wait (a == {32{1'b1}});
+      wait (dump == 1);
       #5
       $display("Writing memory to file %s.", WRITE_FILE_PATH);
       $writememh(WRITE_FILE_PATH, memory);

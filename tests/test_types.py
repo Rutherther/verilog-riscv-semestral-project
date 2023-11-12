@@ -31,9 +31,10 @@ class Test:
     group: TestGroup
     name: str
 
-    input_file: Path
-    output_file: Path
-    expected_file: Path
+    memory_in_file: Path
+    memory_out_file: Path
+    memory_exp_file: Path
+    register_dump_file: Path
 
     def __str__(self):
         return f"{self.group.name}.{self.name}"

@@ -139,16 +139,17 @@ _start:                                                                 \
 //-----------------------------------------------------------------------
 
 #define RVTEST_PASS                                                     \
-        addi x0, zero, 0;                                               \
-        addi x1, zero, 0xFF;                                            \
-        sw x1, 0(x0);                                                   \
+        addi x1, zero, 0xAA;                                            \
+        sw x1, 0(zero);                                                 \
+        nop;                                                            \
         ebreak;
 
 #define TESTNUM gp
 #define RVTEST_FAIL                                                     \
-        addi x0, zero, 0;                                               \
-        addi x1, zero, 0;                                               \
-        sw x1, 0(x0);                                                   \
+        addi x1, zero, 0xFF;                                            \
+        sw x1, 0(zero);                                                 \
+        sw x1, 4(TESTNUM);                                              \
+        nop;                                                            \
         ebreak;
 
 //-----------------------------------------------------------------------
