@@ -1,17 +1,12 @@
-MODULE=tb_control_unit
+MODULE ?= tb_control_unit
+
+PROGRAM ?= gcd
+MEMORY_LOAD ?= in/default_memory_in.dat
+MEMORY_WRITE ?= out/program_$(PROGRAM)_memory_out.dat
 
 ## Verilog part
-.PHONY:sim
-sim: waveform.vcd
+.PHONY: show run_program
 
-.PHONY:verilate
-verilate: .stamp.verilate
-
-.PHONY:build
-
-build: obj_dir/V$(MODULE)
-
-.PHONY:waves
 show: ./waves/$(MODULE).vcd
 	gtkwave ./waves/$(MODULE).vcd
 
@@ -24,13 +19,20 @@ show: ./waves/$(MODULE).vcd
 ./waves:
 	mkdir -p $@
 
+./out:
+	mkdir -p $@
+
 # These are runtime dependencies, not build time dependencies.
 .PRECIOUS: ./programs/bin/%.dat ./programs/bin/%.bin
 
-./obj_dir/Vtb_cpu_program_%: ./programs/bin/%.dat testbench/tb_cpu_program.sv src/*.sv
+run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv ./out
 	verilator --binary --trace \
-		-GCPU_PROGRAM_PATH="\"$<\"" \
-		-GTRACE_FILE_PATH="\"waves/cpu_program_$(notdir $(basename $<)).vcd\"" \
+		-GCPU_PROGRAM_PATH="\"./programs/bin/$(PROGRAM).dat\"" \
+		-GTRACE_FILE_PATH="\"out/program_$(notdir $(basename $<)).vcd\"" \
+		-GMEMORY_LOAD_FILE=1 \
+		-GMEMORY_LOAD_FILE_PATH="\"$(MEMORY_LOAD)\"" \
+		-GMEMORY_WRITE_FILE=1 \
+		-GMEMORY_WRITE_FILE_PATH="\"$(MEMORY_WRITE)\"" \
 		--trace-max-array 512 \
 		src/cpu_types.sv \
 		src/instruction_decoder.sv \
@@ -44,6 +46,7 @@ show: ./waves/$(MODULE).vcd
 		testbench/tb_cpu_program.sv \
 		-o Vtb_cpu_program_$(notdir $(basename $<)) \
 		--top tb_cpu_program
+	./obj_dir/Vtb_cpu_program_$(notdir $(basename $<))
 
 ./obj_dir/Vtb_%: testbench/tb_%.sv src/*.sv
 	verilator --binary --trace \
