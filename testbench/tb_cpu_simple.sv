@@ -35,11 +35,12 @@ module tb_cpu_simple();
     .write_byte_enable(memory_write_byte_enable),
     .we(memory_we),
     .wd(memory_write),
-    .rd(memory_out)
+    .rd(memory_out),
+    .dump(0)
   );
 
-  always_ff @ (posedge ebreak) begin
-    #15 $finish;
+  initial begin
+    #200 $finish;
   end
 
   always_comb begin
