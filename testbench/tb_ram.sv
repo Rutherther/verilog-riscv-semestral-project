@@ -1,25 +1,27 @@
 import cpu_types::*;
 
 module tb_ram();
-
   reg clk;
 
   reg [31:0] a;
 
   wire [31:0] rd;
 
-  memory_mask_t mask;
-
+  reg [3:0]  write_byte_enable;
   reg         we;
   reg [31:0]  wd;
+
+  reg         dump;
+
 
   ram uut(
     .clk(clk),
     .a(a),
     .rd(rd),
-    .mask(mask),
     .we(we),
-    .wd(wd)
+    .wd(wd),
+    .dump(dump),
+    .write_byte_enable(write_byte_enable)
   );
 
   initial begin
@@ -31,9 +33,11 @@ module tb_ram();
     $dumpfile("waves/tb_ram.vcd");
     $dumpvars;
 
+    write_byte_enable = 4'b1111;
+
+
     #10
     a = 32'd103;
-    mask = MEM_WORD;
     we = 1;
     wd = 32'h5;
 
@@ -50,6 +54,15 @@ module tb_ram();
     #10
     we = 0;
     a = 32'd107;
+
+    #10
+    we = 1;
+    write_byte_enable = 4'b1100;
+
+    wd = 32'hFFFFFFFF;
+
+    #10
+    we = 0;
 
     #10 $finish;
   end

@@ -30,6 +30,8 @@ module tb_control_unit();
   memory_mask_t memory_mask;
   wire memory_sign_extension;
 
+  wire ebreak;
+
   control_unit uut(
     .instruction(instruction),
     .memory_we(memory_we),
@@ -49,7 +51,8 @@ module tb_control_unit();
     .reg_rd(reg_rd),
     .reg_we(reg_we),
     .memory_mask(memory_mask),
-    .memory_sign_extension(memory_sign_extension)
+    .memory_sign_extension(memory_sign_extension),
+    .ebreak(ebreak)
   );
 
   initial begin
