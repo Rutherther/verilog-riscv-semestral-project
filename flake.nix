@@ -1,5 +1,5 @@
 {
-  description = "PAP verilog environment";
+  description = "Verilog, RISC-V, Python environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
