@@ -127,7 +127,11 @@ def filter_tests(groups: list[TestGroup], group_name: str|None, test_name: str|N
     return groups
 
 # Program
-parser = argparse.ArgumentParser("Test simple RISC-V processor written in Verilog.")
+parser = argparse.ArgumentParser(
+    prog = "run.py",
+    description = "Test simple RISC-V processor written in Verilog."
+)
+
 parser.add_argument(
     "command",
     choices = [ "run", "list"],
@@ -138,24 +142,24 @@ parser.add_argument(
     "--filter",
     type = str,
     nargs = "*",
-    help = "Filter, should be in group.test format."
+    help = "filter, should be in group.test format"
 )
 parser.add_argument(
     "-t",
     "--type",
     choices = ["custom", "official"],
     default = "custom",
-    help = "Type of the testcases, either custom testcases or official riscv selftests.",
+    help = "type of the testcases, either custom testcases or official riscv selftests",
 )
 parser.add_argument(
     "--trace",
     action = "store_true",
-    help = "Trace, produce vcd file",
+    help = "trace, produce vcd file",
 )
 parser.add_argument(
     "--print-registers",
     action = "store_true",
-    help = "Trace, produce vcd file",
+    help = "dump registers on ebreak to stdout",
 )
 # parser.add_argument(
 #     "--print-memory",
