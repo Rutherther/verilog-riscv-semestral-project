@@ -92,7 +92,8 @@ OBJCOPY=riscv32-none-elf-objcopy
 ./programs/bin/%.dat: ./programs/bin/%.bin
 	od $< -t x4 -A n -v > $@
 
-objdump/%: ./programs/bin/start-%.o
+.PHONY: objdump
+objdump: ./programs/bin/start-$(PROGRAM).o
 	$(OBJDUMP) -d -M no-aliases $<
 
 .PHONY: clean
