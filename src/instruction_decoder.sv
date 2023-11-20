@@ -1,16 +1,16 @@
 import cpu_types::* ;
 
 module instruction_decoder(
-  input [31:0]     instruction,
+  input [31:0]      instruction,
 
   // whether to write to to memory (write enabled)
   // either from alu or pc+4
-  output reg       store_memory,
+  output reg        store_memory,
 
   // whether to load memory to rd
-  output reg       load_memory,
-  output           memory_mask_t memory_mask,
-  output reg       memory_sign_extension,
+  output reg        load_memory,
+  output            memory_mask_t memory_mask,
+  output reg        memory_sign_extension,
 
   // put alu_jump to alu if conditional_jump
   //
@@ -21,36 +21,36 @@ module instruction_decoder(
   // if store pd => rd = pd + 4
 
   // inputs for alu, in case instruction is not conditional_jump
-  output [2:0]     alu_reg_op,         // the operation selection for alu
-  output           alu_reg_add_one,    //  whether to add one to rs2 (may be used for two's complement)
-  output           alu_reg_negate,     // whether to negate rs2 (may be used for two's complement)
-  output           alu_reg_signed,     // whether the operation for alu is signed
+  output [2:0]      alu_reg_op,         // the operation selection for alu
+  output reg        alu_reg_add_one,    //  whether to add one to rs2 (may be used for two's complement)
+  output reg        alu_reg_negate,     // whether to negate rs2 (may be used for two's complement)
+  output            alu_reg_signed,     // whether the operation for alu is signed
 
-  output reg       load_pc,            // should load pc to alu #1
-  output reg       store_pc,           // should store pc + 4 to memory
+  output reg        load_pc,            // should load pc to alu #1
+  output reg        store_pc,           // should store pc + 4 to memory
 
-  output reg       unconditional_jump, // jump, always. To alu output.
+  output reg        unconditional_jump, // jump, always. To alu output.
 
   // jump if alu zero_flag, to pc + imm
-  output reg       conditional_jump,   // should jump if alu zero_flag correct
-  output reg [2:0] alu_jump_op,        // operation for alu for conditional jumps
-  output reg       alu_jump_negate,
-  output reg       alu_jump_add_one,   // add one for conditional jumps
-  output reg       jump_negate_zero,   // whether to negate zero flag from alu
+  output reg        conditional_jump,   // should jump if alu zero_flag correct
+  output reg [2:0]  alu_jump_op,        // operation for alu for conditional jumps
+  output reg        alu_jump_negate,
+  output reg        alu_jump_add_one,   // add one for conditional jumps
+  output reg        jump_negate_zero,   // whether to negate zero flag from alu
 
   // whether to use immediate instead of rs2.
   // if false, immediate still may be added to second operand
-  output           use_immediate,
-  output           load_immediate,
-  output [31:0]    immediate,
+  output reg        use_immediate,
+  output reg        load_immediate,
+  output reg [31:0] immediate,
 
   // inputs to register file
-  output [4:0]     reg_rs1,
-  output reg [4:0] reg_rs2,
-  output [4:0]     reg_rd,
-  output           reg_we,
+  output reg [4:0]  reg_rs1,
+  output reg [4:0]  reg_rs2,
+  output reg [4:0]  reg_rd,
+  output reg        reg_we,
 
-  output reg       ebreak
+  output reg        ebreak
 );
   typedef enum bit[2:0] {Unknown, R, I, S, SB, U, UJ} instruction_type_type;
   instruction_type_type instruction_type;
