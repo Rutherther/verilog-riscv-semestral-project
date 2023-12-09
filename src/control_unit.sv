@@ -25,7 +25,7 @@ module control_unit(
 
   // going to alu
   output [2:0]  alu_op,
-  output        alu_signed,
+  output        alu_sign,
   output        alu_negate,
   output        alu_add_one,
 
@@ -106,7 +106,7 @@ module control_unit(
   assign alu_negate = conditional_jump ? alu_jump_negate :
                       alu_override     ? 0'b0            :
                                          alu_reg_negate;
-  assign alu_signed = conditional_jump ? 0'b0 :
+  assign alu_sign = conditional_jump ? 0'b0 :
                       alu_override     ? 0'b0 :
                                          alu_reg_signed;
 
