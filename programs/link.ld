@@ -1,21 +1,22 @@
+OUTPUT_FORMAT("elf32-littleriscv", "elf32-littleriscv", "elf32-littleriscv")
+
 MEMORY
 {
     ram : ORIGIN = 0x00000000, LENGTH = 1K - 1
 }
 
+PROVIDE( __global_pointer$ = 0x0 );
+
 SECTIONS
 {
-	.text = 0x0;
+	.text : {
+        *(.text._start);
+        *(.text);
+        *(.text.*);
+    } > ram
     .bss : {
-        __bss_start = .;
         *(.bss)
         *(COMMON)
-        __bss_end = .;
-    } > ram
-    .stack : {
-        __stack_start = .;
-        *(.stack)
-        __stack_end = .;
+        *(.bss.*)
     } > ram
 }
-

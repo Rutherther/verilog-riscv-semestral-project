@@ -83,17 +83,17 @@ OBJCOPY=riscv32-none-elf-objcopy
 ./programs/bin/%.o: ./programs/%.c ./programs/bin
 	$(CC) $(CFLAGS) $< -o $@
 
-./programs/bin/start-%.o: ./programs/bin/start.o ./programs/bin/%.o
+./programs/bin/%.elf: ./programs/bin/start.o ./programs/bin/%.o
 	$(LD) $(LDFLAGS) $^ -o $@
 
-./programs/bin/%.bin: ./programs/bin/start-%.o
+./programs/bin/%.bin: ./programs/bin/%.elf
 	$(OBJCOPY) $< -O binary $@
 
 ./programs/bin/%.dat: ./programs/bin/%.bin
 	od $< -t x4 -A n -v > $@
 
 .PHONY: objdump
-objdump: ./programs/bin/start-$(PROGRAM).o
+objdump: ./programs/bin/$(PROGRAM).elf
 	$(OBJDUMP) -d -M no-aliases $<
 
 .PHONY: clean
