@@ -96,6 +96,7 @@ module decode(
     .register_file_data(reg_rd1),
     .data_in_pipeline(data_in_pipeline),
     .stall(stall_1),
+    .forwarding(),
     .data(forwarded_reg_rd1)
   );
 
@@ -105,6 +106,7 @@ module decode(
     .register_file_data(reg_rd2),
     .data_in_pipeline(data_in_pipeline),
     .stall(stall_2),
+    .forwarding(),
     .data(forwarded_reg_rd2)
   );
 
