@@ -1,3 +1,5 @@
+import cpu_types::*;
+
 module memory_access(
   input         clk,
 

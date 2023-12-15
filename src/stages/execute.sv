@@ -1,3 +1,5 @@
+import cpu_types::*;
+
 module execute(
   input clk,
 

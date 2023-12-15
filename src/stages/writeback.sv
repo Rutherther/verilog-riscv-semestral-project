@@ -1,4 +1,7 @@
+import cpu_types::*;
+
 module writeback(
+
   input         clk,
 
   output [4:0]  reg_a_write,
