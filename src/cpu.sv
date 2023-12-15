@@ -33,6 +33,12 @@ module cpu(
   wire [31:0] jumping_pc_next;
 
   stage_status_t stages_in[1:4];
+
+  /// verilator doesn't like that data taken from stages_out[i]
+  // are used in stages_out[i + 1]. But that shouldn't really matter
+  // as there is not really a cyclic dependency.
+  // It just seems that verilator is not very good at "separating"
+  // array elements
 /* verilator lint_off UNOPTFLAT */
   stage_status_t stages_out[0:3];
 /* verilator lint_on UNOPTFLAT */
@@ -76,6 +82,10 @@ module cpu(
       pc_next = pc;
   end
 
+  // data for forwarding from the stages
+  // Note: this is a record instead of an array
+  // just because verilator didn't like it as an array
+  // consider switching back to array.
   forwarding_data_status_t data_in_pipeline;
   assign data_in_pipeline.execute_out = stages_out[EXECUTE].data;
   assign data_in_pipeline.access_out = stages_out[ACCESS].data;

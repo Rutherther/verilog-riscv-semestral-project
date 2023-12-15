@@ -17,8 +17,6 @@ module decode(
   output        stage_status_t stage_out
 );
 
-  parameter FORWARDING_STAGES = 3; // , execute(out), memory(out), writeback(in)
-
   wire [2:0] alu_op;
   wire       alu_add_one;
   wire       alu_negate;
@@ -42,6 +40,7 @@ module decode(
   wire        memory_we;
 
   assign stage_out.data.address = reg_we && !stalling ? reg_rd : 0;
+  assign stage_out.data.valid = 0; // the data cannot be valid at this point;
 
   assign stage_out.pc = stage_in.pc;
 
@@ -110,6 +109,8 @@ module decode(
     .data(forwarded_reg_rd2)
   );
 
+  // TODO: this is there twice instead of just once
+  // the second is in execute stage. Maybe merge these?
   // alu source 1
   reg [31:0] alu_1, alu_2;
   always_comb begin
@@ -158,6 +159,7 @@ module decode(
 
   wire stalling;
   assign stalling = (uses_reg_rd1 && stall_1) || (uses_reg_rd2 && stall_2);
-  assign stage_out.valid = !stalling;
-  assign stage_out.ready = !stalling;
+  assign stage_out.valid = !stalling && stage_in.valid;
+  assign stage_out.ready = !stalling || !stage_in.valid;
+    // if input is not valid, do not care about stalling...
 endmodule

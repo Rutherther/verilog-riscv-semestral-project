@@ -14,6 +14,7 @@ module forwarder(
   // these will be used instead of the register_file_data
   //
   // if there are multiple matches, the first one is taken
+  // to get the most recent data
 
   always_comb begin
     stall = 0;

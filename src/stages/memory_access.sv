@@ -49,6 +49,7 @@ module memory_access(
   assign stage_out.reg_rd1 = stage_in.reg_rd1;
   assign stage_out.reg_rd2 = stage_in.reg_rd2;
 
+  assign stage_out.data.valid = stage_in.valid;
   assign stage_out.data.address = stage_in.valid ? stage_in.data.address : 0;
   assign stage_out.data.data =
     stage_in.instruction.reg_rd_src == RD_MEMORY ?
@@ -58,7 +59,7 @@ module memory_access(
             .sext(stage_in.instruction.memory_sign_extension)
         ) :
         stage_in.data.data;
-  assign stage_out.data.valid = stage_in.valid;
+
   assign stage_out.valid = stage_in.valid;
   assign stage_out.ready = 1;
 endmodule
