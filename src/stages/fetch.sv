@@ -4,13 +4,12 @@ module fetch(
   input        clk,
   input [31:0] pc,
   input [31:0] mem_instruction,
-  input        jump,
 
   output       stage_status_t stage_out
 );
   assign stage_out.instruction.instruction = mem_instruction;
   assign stage_out.pc = pc;
 
-  assign stage_out.valid = 1; // !jump; -- TODO make jumps one cycle after
+  assign stage_out.valid = 1;
   assign stage_out.ready = 1;
 endmodule

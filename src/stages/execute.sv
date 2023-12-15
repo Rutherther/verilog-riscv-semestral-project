@@ -1,13 +1,18 @@
 import cpu_types::*;
 
 module execute(
-  input clk,
+  input             clk,
 
-  input stage_status_t stage_in,
-  output stage_status_t stage_out
+  output            jump,
+  output reg [31:0] jump_pc,
+
+  input             stage_status_t stage_in,
+  output            stage_status_t stage_out
 );
-  reg [31:0] alu_1, alu_2;
+  reg [31:0]  alu_1, alu_2;
   wire [31:0] alu_out;
+  wire        branch_taken;
+  wire        alu_zero;
 
   assign stage_out.instruction = stage_in.instruction;
   assign stage_out.pc = stage_in.pc;
@@ -20,6 +25,20 @@ module execute(
 
   assign stage_out.valid = stage_in.valid;
   assign stage_out.ready = 1;
+
+  assign jump = stage_in.valid && (branch_taken || stage_in.instruction.pc_src == PC_ALU);
+
+  assign branch_taken = stage_in.instruction.jump_instruction && (alu_zero ^ stage_in.instruction.jump_negate_zero);
+  always_comb begin
+    jump_pc = 32'bX;
+    case (stage_in.instruction.pc_src)
+      PC_PLUS : begin
+        if (branch_taken)
+          jump_pc = stage_in.pc + stage_in.instruction.immediate;
+      end
+      PC_ALU : jump_pc = alu_out;
+    endcase
+  end
 
   // alu source 1
   always_comb begin
@@ -46,6 +65,6 @@ module execute(
     .b_add_one(stage_in.instruction.alu_add_one),
     .b_negate(stage_in.instruction.alu_negate),
     .sign(stage_in.instruction.alu_sign),
-    .zero_flag()
+    .zero_flag(alu_zero)
   );
 endmodule

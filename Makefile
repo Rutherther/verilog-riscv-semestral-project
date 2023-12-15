@@ -41,7 +41,6 @@ run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv 
 		src/register_file.sv \
 		src/program_counter.sv \
 		src/forwarder.sv \
-		src/jumps.sv \
         src/stages/*.sv \
 		src/ram.sv \
 		src/cpu.sv \
@@ -61,7 +60,6 @@ run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv 
 		src/register_file.sv \
 		src/program_counter.sv \
 		src/forwarder.sv \
-		src/jumps.sv \
         src/stages/*.sv \
 		src/ram.sv \
 		src/cpu.sv \

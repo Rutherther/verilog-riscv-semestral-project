@@ -26,6 +26,10 @@ package cpu_types;
 
     bit reg_we;
 
+    pc_source_t pc_src;
+    bit jump_instruction;
+    bit jump_negate_zero;
+
     reg_rd_source_t reg_rd_src;
 
   } decoded_instruction_t;

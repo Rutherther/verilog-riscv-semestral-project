@@ -6,7 +6,6 @@ src/register_file.sv
 src/program_counter.sv
 
 src/forwarder.sv
-src/jumps.sv
 
 src/stages/fetch.sv
 src/stages/decode.sv

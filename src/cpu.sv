@@ -95,25 +95,25 @@ module cpu(
     .clk(clk),
     .pc(pc),
     .mem_instruction(instruction),
-    .jump(jump),
     .stage_out(stages_out[FETCH])
   );
 
   decode decode_inst(
     .clk(clk),
+    .jump(jump),
     .data_in_pipeline(data_in_pipeline),
     .reg_a_1(reg_a_1),
     .reg_a_2(reg_a_2),
     .reg_rd1(reg_rd1),
     .reg_rd2(reg_rd2),
-    .jump(jump),
-    .pc_next(jumping_pc_next),
     .stage_in(stages_in[DECODE]),
     .stage_out(stages_out[DECODE])
   );
 
   execute execute_inst(
     .clk(clk),
+    .jump(jump),
+    .jump_pc(jumping_pc_next),
     .stage_in(stages_in[EXECUTE]),
     .stage_out(stages_out[EXECUTE])
   );
