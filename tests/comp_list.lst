@@ -4,6 +4,16 @@ src/control_unit.sv
 src/alu.sv
 src/register_file.sv
 src/program_counter.sv
+
+src/forwarder.sv
+src/jumps.sv
+
+src/stages/fetch.sv
+src/stages/decode.sv
+src/stages/execute.sv
+src/stages/memory_access.sv
+src/stages/writeback.sv
+
 src/ram.sv
 src/cpu.sv
 src/file_program_memory.sv

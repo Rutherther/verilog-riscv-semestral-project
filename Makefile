@@ -25,7 +25,7 @@ show: ./waves/$(MODULE).vcd
 # These are runtime dependencies, not build time dependencies.
 .PRECIOUS: ./programs/bin/%.dat ./programs/bin/%.bin
 
-run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv ./out
+run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv src/stages/*.sv ./out
 	verilator --binary --trace \
 		-GCPU_PROGRAM_PATH="\"./programs/bin/$(PROGRAM).dat\"" \
 		-GTRACE_FILE_PATH="\"out/program_$(notdir $(basename $<)).vcd\"" \
@@ -40,6 +40,9 @@ run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv 
 		src/alu.sv \
 		src/register_file.sv \
 		src/program_counter.sv \
+		src/forwarder.sv \
+		src/jumps.sv \
+        src/stages/*.sv \
 		src/ram.sv \
 		src/cpu.sv \
 		src/file_program_memory.sv \
@@ -48,7 +51,7 @@ run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv 
 		--top tb_cpu_program
 	./obj_dir/Vtb_cpu_program_$(notdir $(basename $<))
 
-./obj_dir/Vtb_%: testbench/tb_%.sv src/*.sv
+./obj_dir/Vtb_%: testbench/tb_%.sv src/*.sv src/stages/*.sv
 	verilator --binary --trace \
 		--trace-max-array 512 \
 		src/cpu_types.sv \
@@ -57,6 +60,9 @@ run_program: ./programs/bin/$(PROGRAM).dat testbench/tb_cpu_program.sv src/*.sv 
 		src/alu.sv \
 		src/register_file.sv \
 		src/program_counter.sv \
+		src/forwarder.sv \
+		src/jumps.sv \
+        src/stages/*.sv \
 		src/ram.sv \
 		src/cpu.sv \
 		src/file_program_memory.sv \

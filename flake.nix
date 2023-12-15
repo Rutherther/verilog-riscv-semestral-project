@@ -19,7 +19,7 @@
             };
         in rec {
           devShells.default = pkgs.mkShell {
-            name = "pap-processor-singlecycle";
+            name = "riscv-sv-processor-toolchain";
 
             packages = [
               # verilog simulation

@@ -16,7 +16,7 @@ module tb_control_unit();
   alu_2_source_t alu_src_2;
 
   wire [2:0]  alu_op;
-  wire        alu_signed;
+  wire        alu_sign;
   wire        alu_negate;
   wire        alu_add_one;
 
@@ -42,7 +42,7 @@ module tb_control_unit();
     .alu_src_1(alu_src_1),
     .alu_src_2(alu_src_2),
     .alu_op(alu_op),
-    .alu_signed(alu_signed),
+    .alu_sign(alu_sign),
     .alu_negate(alu_negate),
     .alu_add_one(alu_add_one),
     .reg_rs1(reg_rs1),

@@ -2,8 +2,49 @@
 Available at https://github.com/Rutherther/verilog-riscv-semestral-project
 
 This repository contains RISC-V processor written in SystemVerilog.
+It contains both singlecycle and pipelined version.
+Classic RISC pipeline is utilized.
 
 ## Architecture
+The singlecycle version is located in `src/cpu_singlecycle.sv`.
+The pipelined version is in `src/cpu.sv`.
+
+There are five stages in the pipelined version
+- Fetch (fetches instruction from memory)
+- Decode (decodes the fetched instruction, performs jumps, gets data from forwarder)
+- Execute (alu)
+- Memory access (loads, stores)
+- Writeback (stores data in registers)
+
+There are forwards whenever possible for data dependencies.
+The forward is realized inside of the decode stage
+that will supply arguments to the execute stage.
+If there is a read from memory, there has to be a stall,
+the pipeline can stall. The stalling is implemented using
+ready flags in each of the stages. It is thus possible to easily
+implement a stage that would block for multiple cycles
+instead of producing valid data every cycle.
+For now, all of the stages take one cycle to produce valid data.
+
+The forwarding is done by keeping address and data known in each stage
+inside of the status.data. Outputs of execute, memory access, and
+input of writeback are used for forwarding. It would be possible to
+skip the writeback forwarding if instead the register file outputted data
+to be written instead of the contents of the register until it's actually
+written to. I am afraid this could cause other issues, hence I chose forwarding instead.
+
+All stages have valid and ready flags.
+
+Ready flag is used for stalling. If a stage is not ready, there cannot
+be data going into it, and the pipeline before that has to be stopped,
+including program counter changes. This is used for stalling when waiting for a read
+out of the memory, but could also be used for making the execute stage more complex,
+ie. making it work multiple cycles instead of a one. It should also be possible to implement
+reads that are not aligned, by reading from two consequent positions in the memory in two cycles.
+
+Valid flag is for "killing" data that cannot be valid. 
+It's utilized when stalling - data from decode are not
+valid in that case. When stalling, both valid and ready should be 0.
 
 ## Requirements
 - make
