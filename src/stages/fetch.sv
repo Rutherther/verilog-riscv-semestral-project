@@ -11,6 +11,6 @@ module fetch(
   assign stage_out.instruction.instruction = mem_instruction;
   assign stage_out.pc = pc;
 
-  assign stage_out.valid = !jump;
+  assign stage_out.valid = 1; // !jump; -- TODO make jumps one cycle after
   assign stage_out.ready = 1;
 endmodule
