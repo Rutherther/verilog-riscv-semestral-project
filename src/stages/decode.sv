@@ -10,7 +10,7 @@ module decode(
   input [31:0] reg_rd1,
   input [31:0] reg_rd2,
 
-  input        jump,
+  input        flush,
 
   input        stage_status_t stage_in,
   output       stage_status_t stage_out
@@ -104,7 +104,7 @@ module decode(
 
   wire stalling;
   assign stalling = (uses_reg_rd1 && stall_1) || (uses_reg_rd2 && stall_2);
-  assign stage_out.valid = !jump && !stalling && stage_in.valid;
+  assign stage_out.valid = !flush && !stalling && stage_in.valid;
   assign stage_out.ready = !stalling || !stage_in.valid;
     // if input is not valid, do not care about stalling...
 endmodule

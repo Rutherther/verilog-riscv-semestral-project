@@ -6,7 +6,7 @@ module cpu(
 
   // program memory
   input [31:0]      instruction,
-  output reg [31:0] pc,
+  output [31:0] pc,
 
   // ram
   output [31:0]     memory_address,
@@ -26,60 +26,51 @@ module cpu(
   reg [31:0]  reg_write;
   wire        reg_we;
 
-  reg [2:0]  last_non_ready_stage;
   reg        all_stages_ready;
 
   wire        jump;
   wire [31:0] jumping_pc_next;
 
-  stage_status_t stages_in[1:4];
+  stage_status_t fetch_out;
+  stage_status_t decode_out;
+  stage_status_t execute_out;
+  stage_status_t memory_access_out;
 
-  /// verilator doesn't like that data taken from stages_out[i]
-  // are used in stages_out[i + 1]. But that shouldn't really matter
-  // as there is not really a cyclic dependency.
-  // It just seems that verilator is not very good at "separating"
-  // array elements
-/* verilator lint_off UNOPTFLAT */
-  stage_status_t stages_out[0:3];
-/* verilator lint_on UNOPTFLAT */
+  stage_status_t decode_in;
+  stage_status_t execute_in;
+  stage_status_t memory_access_in;
+  stage_status_t writeback_in;
 
-  assign ebreak = stages_out[ACCESS].instruction.ebreak;
+  assign ebreak = memory_access_out.instruction.ebreak;
 
   // stage registers
   always_ff @(posedge clk) begin
     if (rst_n == 0) begin
-      for (int i = 0; i < $size(stages_in); i++) begin
-        stages_in[i].data.address = 0;
-      end
+      decode_in.data.address = 0;
+      execute_in.data.address = 0;
+      memory_access_in.data.address = 0;
+      writeback_in.data.address = 0;
     end
     else begin
-      for (int i = 0; i < $size(stages_in); i++) begin
-        if (all_stages_ready || i >= last_non_ready_stage) begin
-          stages_in[i + 1] = stages_out[i];
-        end
-      end
+      if (decode_out.ready && execute_out.ready && memory_access_out.ready)
+        decode_in = fetch_out;
+      if (execute_out.ready && memory_access_out.ready)
+        execute_in = decode_out;
+      if (memory_access_out.ready)
+        memory_access_in = execute_out;
+      writeback_in = memory_access_out;
     end
   end
 
-  // find first non ready stage. Stages before that will be stalled
-  always_comb begin
-    last_non_ready_stage = 0;
-    all_stages_ready = 1'b1;
-    for (int i = 0; i < $size(stages_out); i++) begin
-      if (!stages_out[i].ready) begin
-        last_non_ready_stage = i[2:0];
-        all_stages_ready = 1'b0;
-      end
-    end
-  end
+  assign all_stages_ready = fetch_out.ready && decode_out.ready && execute_out.ready && memory_access_out.ready;
 
   always_comb begin
-    if (jump)
-      pc_next = jumping_pc_next;
-    else if (all_stages_ready) // assume no jump. If jump, if result will be thrown out
-      pc_next = pc + 4;
-    else // stalling (in any stage, meaning not fetching new instructions)
+    if (!all_stages_ready)
       pc_next = pc;
+    else if (jump)
+      pc_next = jumping_pc_next;
+    else // assume no jump. If jump, if result will be thrown out
+      pc_next = pc + 4;
   end
 
   // data for forwarding from the stages
@@ -87,35 +78,36 @@ module cpu(
   // just because verilator didn't like it as an array
   // consider switching back to array.
   forwarding_data_status_t data_in_pipeline;
-  assign data_in_pipeline.execute_out = stages_out[EXECUTE].data;
-  assign data_in_pipeline.access_out = stages_out[ACCESS].data;
-  assign data_in_pipeline.writeback_in = stages_in[WRITEBACK].data;
+  assign data_in_pipeline.execute_out = execute_out.data;
+  assign data_in_pipeline.access_out = memory_access_out.data;
+  assign data_in_pipeline.writeback_in = writeback_in.data;
 
   fetch fetch_inst(
     .clk(clk),
     .pc(pc),
+    .flush(jump),
     .mem_instruction(instruction),
-    .stage_out(stages_out[FETCH])
+    .stage_out(fetch_out)
   );
 
   decode decode_inst(
     .clk(clk),
-    .jump(jump),
+    .flush(jump),
     .data_in_pipeline(data_in_pipeline),
     .reg_a_1(reg_a_1),
     .reg_a_2(reg_a_2),
     .reg_rd1(reg_rd1),
     .reg_rd2(reg_rd2),
-    .stage_in(stages_in[DECODE]),
-    .stage_out(stages_out[DECODE])
+    .stage_in(decode_in),
+    .stage_out(decode_out)
   );
 
   execute execute_inst(
     .clk(clk),
     .jump(jump),
     .jump_pc(jumping_pc_next),
-    .stage_in(stages_in[EXECUTE]),
-    .stage_out(stages_out[EXECUTE])
+    .stage_in(execute_in),
+    .stage_out(execute_out)
   );
 
   memory_access memory_access_inst(
@@ -125,8 +117,8 @@ module cpu(
     .memory_write(memory_write),
     .memory_we(memory_we),
     .memory_address(memory_address),
-    .stage_in(stages_in[ACCESS]),
-    .stage_out(stages_out[ACCESS])
+    .stage_in(memory_access_in),
+    .stage_out(memory_access_out)
   );
 
   writeback writeback_inst(
@@ -134,7 +126,7 @@ module cpu(
     .reg_a_write(reg_a_w),
     .reg_we(reg_we),
     .reg_write(reg_write),
-    .stage_in(stages_in[WRITEBACK])
+    .stage_in(writeback_in)
   );
 
   register_file #(.WIDTH(WIDTH), .ADDRESS_LENGTH(5)) register_file_inst(
