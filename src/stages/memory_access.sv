@@ -78,7 +78,7 @@ module memory_access(
     memory_write = 32'bX;
     memory_byte_enable = 4'bX;
     // regular access (or not access at all)
-    if (offset_position == 1'b0) begin
+    if (misaligned_access == 1'b0) begin
       memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) << bit_position;
       memory_write = stage_in.reg_rd2 << (8*bit_position);
       read_data = mem_sext_maybe(
