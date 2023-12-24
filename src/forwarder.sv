@@ -21,19 +21,19 @@ module forwarder(
     data = register_file_data;
     forwarding = 0;
 
-    if (read_address != 0 && data_in_pipeline.execute_out.address == read_address) begin
+    if (read_address != 0 && data_in_pipeline.execute_out.target == read_address) begin
       stall = !data_in_pipeline.execute_out.valid;
-      data = data_in_pipeline.execute_out.data;
+      data = data_in_pipeline.execute_out.value;
       forwarding = 1;
     end
-    else if (read_address != 0 && data_in_pipeline.access_out.address == read_address) begin
+    else if (read_address != 0 && data_in_pipeline.access_out.target == read_address) begin
       stall = !data_in_pipeline.access_out.valid;
-      data = data_in_pipeline.access_out.data;
+      data = data_in_pipeline.access_out.value;
       forwarding = 1;
     end
-    else if (read_address != 0 && data_in_pipeline.writeback_in.address == read_address) begin
+    else if (read_address != 0 && data_in_pipeline.writeback_in.target == read_address) begin
       stall = !data_in_pipeline.writeback_in.valid;
-      data = data_in_pipeline.writeback_in.data;
+      data = data_in_pipeline.writeback_in.value;
       forwarding = 1;
     end
   end

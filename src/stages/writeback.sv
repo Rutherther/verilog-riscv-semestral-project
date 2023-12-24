@@ -10,7 +10,7 @@ module writeback(
 
   input         stage_status_t stage_in
 );
-  assign reg_a_write = stage_in.data.address;
-  assign reg_we = stage_in.valid && stage_in.data.valid && stage_in.instruction.reg_we; // stage_in.data.address != 0
-  assign reg_write = stage_in.data.data;
+  assign reg_a_write = stage_in.data.target;
+  assign reg_we = stage_in.valid && stage_in.data.valid && stage_in.instruction.reg_we; // stage_in.data.target != 0
+  assign reg_write = stage_in.data.value;
 endmodule

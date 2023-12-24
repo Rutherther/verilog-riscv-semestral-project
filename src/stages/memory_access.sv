@@ -3,7 +3,7 @@ import cpu_types::*;
 module memory_access(
   input             clk,
 
-  input [31:0]      memory_out,
+  input [31:0]      memory_read,
   output reg [3:0]  memory_byte_enable,
   output reg [31:0] memory_write,
   output            memory_we,
@@ -40,36 +40,36 @@ module memory_access(
   endfunction
 
   reg [31:0]  read_data;
-  reg [31:0]  stored_read_data;
+  reg [31:0]  reg_read_data;
   reg         misaligned_access; // signals that two addresses will have to be accessed
-  reg         offset_position;
+  reg         misaligned_phase;
   wire        is_read;
   wire        is_write;
-  wire [1:0]  bit_position;
+  wire [1:0]  byte_position_offset;
   memory_mask_t       memory_mask;
 
   assign memory_mask = stage_in.instruction.memory_mask;
   assign is_read = stage_in.valid && stage_in.instruction.reg_rd_src == RD_MEMORY;
   assign is_write = stage_in.valid && stage_in.instruction.memory_we;
-  assign bit_position = memory_address[1:0];
+  assign byte_position_offset = memory_address[1:0];
 
   assign misaligned_access = (is_read || is_write) &&
-                          ((bit_position == 2'b11 && memory_mask == MEM_HALFWORD) ||
-                          (bit_position != 0 && memory_mask == MEM_WORD)); // for MEM_BYTE, cannot happen
+                          ((byte_position_offset == 2'b11 && memory_mask == MEM_HALFWORD) ||
+                          (byte_position_offset != 0 && memory_mask == MEM_WORD)); // for MEM_BYTE, cannot happen
 
   always_ff @ (posedge clk) begin
-    stored_read_data = read_data;
+    reg_read_data = read_data;
 
     if (misaligned_access) begin
-      if (offset_position == 1'b1) begin
-        offset_position = 1'b0;
+      if (misaligned_phase == 1'b1) begin
+        misaligned_phase = 1'b0;
       end
       else begin
-        offset_position = offset_position + 1;
+        misaligned_phase = misaligned_phase + 1;
       end
     end
     else begin
-      offset_position = 1'b0;
+      misaligned_phase = 1'b0;
     end
   end
 
@@ -77,26 +77,22 @@ module memory_access(
     read_data = 32'bX;
     memory_write = 32'bX;
     memory_byte_enable = 4'bX;
-    // regular access (or not access at all)
-    if (misaligned_access == 1'b0) begin
-      memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) << bit_position;
-      memory_write = stage_in.reg_rd2 << (8*bit_position);
+    if (misaligned_phase == 1'b0) begin
+      memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) << byte_position_offset;
+      memory_write = stage_in.reg_rs2 << (8*byte_position_offset);
       read_data = mem_sext_maybe(
-          .num(memory_out >> (8 * bit_position)),
+// for misaligned access, the byte that would be extended
+// isn't loaded yet, so this is safe (won't extend to ones)
+          .num(memory_read >> (8 * byte_position_offset)),
           .mask(memory_mask),
           .sext(stage_in.instruction.memory_sign_extension)
       );
-    end // misaligned access:
-    else if (offset_position == 1'b0) begin
-      memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) << bit_position;
-      memory_write = stage_in.reg_rd2 << (8*bit_position);
-      read_data = memory_out >> (8 * bit_position);
     end // second stage of misaligned access:
-    else if (offset_position == 1'b1) begin
-      memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) >> (4 - {2'b0, bit_position});
-      memory_write = stage_in.reg_rd2 >> (4 - {2'b0, bit_position})*8;
+    else if (misaligned_phase == 1'b1) begin
+      memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) >> (4 - {2'b0, byte_position_offset});
+      memory_write = stage_in.reg_rs2 >> (4 - {2'b0, byte_position_offset})*8;
       read_data = mem_sext_maybe(
-        .num((memory_out << (4 - {2'b0, bit_position}) * 8) | stored_read_data),
+        .num((memory_read << (4 - {2'b0, byte_position_offset}) * 8) | reg_read_data),
         .mask(memory_mask),
         .sext(stage_in.instruction.memory_sign_extension)
       );
@@ -104,7 +100,7 @@ module memory_access(
 
   end
 
-  assign memory_address = stage_in.data.data + {29'b0, offset_position, 2'b0};
+  assign memory_address = stage_in.data.value + {29'b0, misaligned_phase, 2'b0};
 
   // 1. figure out if two addresses will have to be read
   // if yes, set ready to 0
@@ -117,16 +113,16 @@ module memory_access(
 
   assign stage_out.instruction = stage_in.instruction;
   assign stage_out.pc = stage_in.pc;
-  assign stage_out.reg_rd1 = stage_in.reg_rd1;
-  assign stage_out.reg_rd2 = stage_in.reg_rd2;
+  assign stage_out.reg_rs1 = stage_in.reg_rs1;
+  assign stage_out.reg_rs2 = stage_in.reg_rs2;
 
-  assign stage_out.data.valid = stage_in.valid && (offset_position == 1'b1 || !misaligned_access);
-  assign stage_out.data.address = stage_in.valid ? stage_in.data.address : 0;
-  assign stage_out.data.data =
+  assign stage_out.data.valid = stage_in.valid && (misaligned_phase == 1'b1 || !misaligned_access);
+  assign stage_out.data.target = stage_in.valid ? stage_in.data.target : 0;
+  assign stage_out.data.value =
     is_read ?
         read_data :
-        stage_in.data.data;
+        stage_in.data.value;
 
-  assign stage_out.valid = stage_in.valid && (offset_position == 1'b1 || !misaligned_access);
-  assign stage_out.ready = offset_position == 1'b1 || !misaligned_access;
+  assign stage_out.valid = stage_in.valid && (misaligned_phase == 1'b1 || !misaligned_access);
+  assign stage_out.ready = misaligned_phase == 1'b1 || !misaligned_access;
 endmodule

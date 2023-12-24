@@ -32,7 +32,7 @@ module tb_cpu_program();
     .pc(pc),
 
     .memory_address(memory_address),
-    .memory_out(memory_out),
+    .memory_read(memory_out),
     .memory_write(memory_write),
     .memory_byte_enable(memory_write_byte_enable),
     .memory_we(memory_we),

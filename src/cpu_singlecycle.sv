@@ -31,7 +31,7 @@ module cpu(
   wire [31:0] alu_out;
 
   wire [4:0]  reg_a_1, reg_a_2, reg_a_w;
-  wire [31:0] reg_rd1, reg_rd2;
+  wire [31:0] reg_rs1, reg_rs2;
   reg [31:0]  reg_write;
   wire [1:0]  reg_write_src;
   wire        reg_we;
@@ -72,13 +72,13 @@ module cpu(
   endfunction
 
   assign memory_byte_enable = mask_to_mask_bytes(.mask(memory_mask)) << memory_address[1:0];
-  assign memory_write = reg_rd2 << (8*memory_address[1:0]);
+  assign memory_write = reg_rs2 << (8*memory_address[1:0]);
   assign memory_address = alu_out;
 
   // alu source 1
   always_comb begin
     case (alu_1_src)
-      REG_FILE_RS1 : alu_1 = reg_rd1;
+      REG_FILE_RS1 : alu_1 = reg_rs1;
       PC : alu_1 = pc;
     endcase
   end
@@ -86,7 +86,7 @@ module cpu(
   // alu source 2
   always_comb begin
     case (alu_2_src)
-      REG_FILE_RS2 : alu_2 = reg_rd2;
+      REG_FILE_RS2 : alu_2 = reg_rs2;
       IMMEDIATE : alu_2 = immediate;
     endcase
   end
@@ -169,8 +169,8 @@ module cpu(
     .a3(reg_a_w),
     .we3(reg_we),
     .wd3(reg_write),
-    .rd1(reg_rd1),
-    .rd2(reg_rd2)
+    .rd1(reg_rs1),
+    .rd2(reg_rs2)
   );
 
   program_counter program_counter_inst(

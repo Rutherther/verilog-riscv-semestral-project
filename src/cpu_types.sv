@@ -40,8 +40,8 @@ package cpu_types;
   // of getting it from the register. Additionaly, if the data
   // are invalid, stalling will be necessary.
   typedef struct {
-    bit [4:0]  address; // The address the data will be written to
-    bit [31:0] data; // The data to be written to the address
+    bit [4:0]  target; // The address the data will be written to
+    bit [31:0] value; // The data to be written to the address
     bit        valid; // Are the data valid? (data will be invalid for memory operations in execute stage)
   } register_data_status_t;
 
@@ -57,17 +57,11 @@ package cpu_types;
 
     bit [31:0] pc;
 
-    bit [31:0] reg_rd1;
-    bit [31:0] reg_rd2;
+    bit [31:0] reg_rs1;
+    bit [31:0] reg_rs2;
 
     bit valid;
     bit ready;
     // !ready == stall
   } stage_status_t;
-
-  const int FETCH = 0;
-  const int DECODE = 1;
-  const int EXECUTE = 2;
-  const int ACCESS = 3;
-  const int WRITEBACK = 4;
 endpackage

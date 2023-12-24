@@ -16,11 +16,11 @@ module execute(
 
   assign stage_out.instruction = stage_in.instruction;
   assign stage_out.pc = stage_in.pc;
-  assign stage_out.reg_rd1 = stage_in.reg_rd1;
-  assign stage_out.reg_rd2 = stage_in.reg_rd2;
+  assign stage_out.reg_rs1 = stage_in.reg_rs1;
+  assign stage_out.reg_rs2 = stage_in.reg_rs2;
 
-  assign stage_out.data.address = stage_in.valid ? stage_in.data.address : 0;
-  assign stage_out.data.data = stage_in.instruction.reg_rd_src == RD_PC_PLUS ? stage_in.pc + 4 : alu_out;
+  assign stage_out.data.target = stage_in.valid ? stage_in.data.target : 0;
+  assign stage_out.data.value = stage_in.instruction.reg_rd_src == RD_PC_PLUS ? stage_in.pc + 4 : alu_out;
   assign stage_out.data.valid = stage_in.valid && (stage_in.instruction.reg_rd_src != RD_MEMORY);
 
   assign stage_out.valid = stage_in.valid;
@@ -43,7 +43,7 @@ module execute(
   // alu source 1
   always_comb begin
     case (stage_in.instruction.alu_1_src)
-      REG_FILE_RS1 : alu_1 = stage_in.reg_rd1;
+      REG_FILE_RS1 : alu_1 = stage_in.reg_rs1;
       PC : alu_1 = stage_in.pc;
     endcase
   end
@@ -51,7 +51,7 @@ module execute(
   // alu source 2
   always_comb begin
     case (stage_in.instruction.alu_2_src)
-      REG_FILE_RS2 : alu_2 = stage_in.reg_rd2;
+      REG_FILE_RS2 : alu_2 = stage_in.reg_rs2;
       IMMEDIATE : alu_2 = stage_in.instruction.immediate;
     endcase
   end
