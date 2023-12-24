@@ -36,6 +36,7 @@ module decode(
   assign stage_out.data.valid = 0; // the data cannot be valid at this point;
 
   assign stage_out.pc = stage_in.pc;
+  assign stage_out.pc_plus_4 = stage_in.pc_plus_4;
 
   assign stage_out.instruction.reg_we = reg_we;
 

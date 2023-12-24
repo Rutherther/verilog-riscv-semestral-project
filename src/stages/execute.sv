@@ -16,11 +16,12 @@ module execute(
 
   assign stage_out.instruction = stage_in.instruction;
   assign stage_out.pc = stage_in.pc;
+  assign stage_out.pc_plus_4 = stage_in.pc_plus_4;
   assign stage_out.reg_rs1 = stage_in.reg_rs1;
   assign stage_out.reg_rs2 = stage_in.reg_rs2;
 
   assign stage_out.data.target = stage_in.valid ? stage_in.data.target : 0;
-  assign stage_out.data.value = stage_in.instruction.reg_rd_src == RD_PC_PLUS ? stage_in.pc + 4 : alu_out;
+  assign stage_out.data.value = stage_in.instruction.reg_rd_src == RD_PC_PLUS ? stage_in.pc_plus_4 : alu_out;
   assign stage_out.data.valid = stage_in.valid && (stage_in.instruction.reg_rd_src != RD_MEMORY);
 
   assign stage_out.valid = stage_in.valid;

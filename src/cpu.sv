@@ -70,7 +70,7 @@ module cpu(
     else if (jump)
       pc_next = jumping_pc_next;
     else // assume no jump. If jump, if result will be thrown out
-      pc_next = pc + 4;
+      pc_next = fetch_out.pc_plus_4;
   end
 
   // data for forwarding from the stages

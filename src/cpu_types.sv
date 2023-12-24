@@ -56,6 +56,7 @@ package cpu_types;
     register_data_status_t data;
 
     bit [31:0] pc;
+    bit [31:0] pc_plus_4;
 
     bit [31:0] reg_rs1;
     bit [31:0] reg_rs2;

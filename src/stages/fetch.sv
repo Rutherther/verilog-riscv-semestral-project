@@ -9,7 +9,9 @@ module fetch(
   output       stage_status_t stage_out
 );
   assign stage_out.instruction.instruction = mem_instruction;
+
   assign stage_out.pc = pc;
+  assign stage_out.pc_plus_4 = pc + 4;
 
   assign stage_out.valid = !flush;
   assign stage_out.ready = 1;
